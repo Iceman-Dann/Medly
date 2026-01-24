@@ -61,7 +61,9 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
                             <span className="text-[10px] font-bold text-emerald-500 uppercase">Vault Secured</span>
                         </div>
                     </div>
-                    <Link to="/profile" className="size-9 rounded-full bg-cover bg-center border-2 border-primary/20 shadow-sm transition-transform hover:scale-110 active:scale-95" style={{ backgroundImage: `url('https://picsum.photos/seed/user/100')` }}></Link>
+                    <Link to="/profile" className="transition-transform hover:scale-110 active:scale-95">
+                        <span className="mdi mdi-incognito-circle text-slate-500 dark:text-slate-400 text-2xl"></span>
+                    </Link>
                 </div>
             </div>
         </header>
@@ -126,12 +128,7 @@ const App: React.FC = () => {
                         </Routes>
                     </main>
                     <footer className="p-8 border-t border-slate-200 dark:border-rose-900/20 lg:ml-64 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <p>© 2024 Symra Health Advocacy. All rights reserved.</p>
-                        <div className="flex gap-6">
-                            <a href="#" className="hover:text-primary">Privacy Policy</a>
-                            <a href="#" className="hover:text-primary">Terms of Service</a>
-                            <a href="#" className="hover:text-primary">Medical Disclaimer</a>
-                        </div>
+                        <p>Symra, RoseHack 2026</p>
                     </footer>
                 </div>
             </Router>

@@ -122,23 +122,6 @@ const Dashboard: React.FC = () => {
 
                 {/* Sidebar Cards */}
                 <div className="col-span-12 lg:col-span-5 space-y-6">
-                    <div className="bg-white dark:bg-rose-950/10 border border-slate-200 dark:border-rose-900/30 rounded-3xl p-6 shadow-sm">
-                        <div className="flex items-center justify-between mb-5">
-                            <h3 className="text-lg font-bold">Visual Proof</h3>
-                            <button className="text-primary bg-primary/10 p-2 rounded-xl material-symbols-outlined text-[20px]">photo_camera</button>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="aspect-square rounded-2xl bg-slate-100 dark:bg-background-dark overflow-hidden border border-slate-200 dark:border-rose-900/30 group cursor-pointer relative">
-                                <img src="https://picsum.photos/seed/doc1/400" alt="Document" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold uppercase tracking-widest">View</div>
-                            </div>
-                            <div className="aspect-square rounded-2xl bg-slate-100 dark:bg-background-dark overflow-hidden border border-slate-200 dark:border-rose-900/30 group cursor-pointer relative">
-                                <img src="https://picsum.photos/seed/doc2/400" alt="Document" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold uppercase tracking-widest">View</div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="bg-gradient-to-br from-primary to-primary-dark p-6 rounded-3xl shadow-lg shadow-primary/20 text-white relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
                             <span className="material-symbols-outlined text-[80px]">auto_awesome</span>
