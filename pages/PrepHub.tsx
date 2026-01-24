@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useHealth } from '../HealthContext';
 import { gemini } from '../services/gemini';
 import { ClinicalReport } from '../types';
+import jsPDF from 'jspdf';
 
 type TimeRange = '7d' | '30d' | '3m' | 'custom';
 
@@ -302,6 +304,104 @@ const PrepHub: React.FC = () => {
         ? reports.find(r => r.id === activeReportId) 
         : reports[0];
 
+    const handlePrintPDF = () => {
+        if (!activeReport) return;
+
+        const filteredLogs = getFilteredLogsForReport(activeReport);
+        const patterns = calculatePatterns(filteredLogs);
+
+        const formatTimeRange = (range: string) => {
+            if (range.startsWith('custom:')) {
+                const dates = range.replace('custom:', '').split('_');
+                if (dates.length === 2) {
+                    const start = new Date(dates[0]);
+                    const end = new Date(dates[1]);
+                    return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+                }
+            }
+            if (range === '7d') return 'Last 7 days';
+            if (range === '30d') return 'Last 30 days';
+            if (range === '3m') return 'Last 3 months';
+            return range;
+        };
+
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        let yPos = margin;
+        const lineHeight = 7;
+        const maxWidth = pageWidth - (margin * 2);
+
+        const addText = (text: string, fontSize: number = 12, isBold: boolean = false, color: [number, number, number] = [0, 0, 0]) => {
+            doc.setFontSize(fontSize);
+            doc.setTextColor(color[0], color[1], color[2]);
+            if (isBold) {
+                doc.setFont(undefined, 'bold');
+            } else {
+                doc.setFont(undefined, 'normal');
+            }
+            
+            const lines = doc.splitTextToSize(text, maxWidth);
+            if (yPos + (lines.length * lineHeight) > pageHeight - margin) {
+                doc.addPage();
+                yPos = margin;
+            }
+            
+            lines.forEach((line: string) => {
+                doc.text(line, margin, yPos);
+                yPos += lineHeight;
+            });
+        };
+
+        doc.setTextColor(238, 43, 140);
+        addText('SYMRA CLINICAL REPORT', 18, true, [238, 43, 140]);
+        yPos += 5;
+
+        doc.setTextColor(0, 0, 0);
+        addText(`Generated: ${new Date(activeReport.timestamp).toLocaleDateString()}`, 10);
+        addText(`Time Range: ${formatTimeRange(activeReport.timeRange)}`, 10);
+        addText(`Focus Areas: ${activeReport.focusAreas.join(', ')}`, 10);
+        yPos += 10;
+
+        addText('SOAP NOTE', 14, true);
+        yPos += 5;
+
+        addText('[S] SUBJECTIVE:', 12, true);
+        addText(activeReport.soapNote.subjective, 11);
+        yPos += 5;
+
+        addText('[O] OBJECTIVE:', 12, true);
+        addText(activeReport.soapNote.objective || '', 11);
+        yPos += 5;
+
+        if (patterns.length > 0) {
+            addText('PATTERN SUMMARY', 12, true);
+            addText(`Total Logs: ${filteredLogs.length}`, 10);
+            addText(`Unique Symptoms: ${patterns.length}`, 10);
+            yPos += 3;
+
+            addText('Frequency & Severity by Symptom:', 10, true);
+            patterns.forEach((pattern) => {
+                addText(`${pattern.symptom}: ${pattern.frequency} occurrence${pattern.frequency !== 1 ? 's' : ''}, Avg severity ${pattern.avgSeverity}/10 (Range: ${pattern.minSeverity}-${pattern.maxSeverity}/10)`, 10);
+            });
+            yPos += 5;
+        }
+
+        if (activeReport.checklist && activeReport.checklist.length > 0) {
+            addText('PROVIDER CHECKLIST', 12, true);
+            yPos += 3;
+            activeReport.checklist.forEach((item, index) => {
+                addText(`${index + 1}. ${item.question}`, 10, true);
+                addText(`   Context: ${item.reason}`, 9);
+                yPos += 2;
+            });
+        }
+
+        const fileName = `Symra-Report-${new Date(activeReport.timestamp).toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+    };
+
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-10 lg:p-12 lg:ml-64 animate-in fade-in duration-500">
             <header className="mb-10 flex flex-col gap-2">
@@ -413,7 +513,7 @@ const PrepHub: React.FC = () => {
 
             {/* Main Report View */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-                <div className="lg:col-span-2 flex flex-col gap-6">
+                <div className="lg:col-span-2 flex flex-col gap-6" id="active-report-preview">
                     <div className="flex items-center justify-between">
                         <h2 className="text-2xl font-bold tracking-tight">Active Report Preview</h2>
                         <div className="flex items-center gap-2">
@@ -456,52 +556,87 @@ const PrepHub: React.FC = () => {
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6 pl-3">
+                                <div className="space-y-3">
+                                    <span className="font-black text-primary uppercase text-xs tracking-widest flex items-center gap-2">
+                                        <span className="w-1 h-3 bg-primary rounded-full"></span>
+                                        [O] Objective:
+                                    </span>
+                                    <div className="pl-3 space-y-4">
+                                        <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                                            {activeReport.soapNote.objective}
+                                        </p>
+                                        
+                                        {(() => {
+                                            const filteredLogs = getFilteredLogsForReport(activeReport);
+                                            const patterns = calculatePatterns(filteredLogs);
+                                            
+                                            if (patterns.length > 0) {
+                                                return (
+                                                    <div className="mt-6 pt-6 border-t border-rose-100 dark:border-rose-900/30">
+                                                        <p className="text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4">Pattern Summary</p>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                            <div className="bg-rose-50/30 dark:bg-black/20 p-4 rounded-xl border border-rose-100 dark:border-rose-900/20">
+                                                                <p className="text-[10px] text-slate-500 uppercase font-black mb-1 tracking-widest">Total Logs</p>
+                                                                <p className="text-2xl font-black text-slate-900 dark:text-white">{filteredLogs.length}</p>
+                                                            </div>
+                                                            <div className="bg-rose-50/30 dark:bg-black/20 p-4 rounded-xl border border-rose-100 dark:border-rose-900/20">
+                                                                <p className="text-[10px] text-slate-500 uppercase font-black mb-1 tracking-widest">Unique Symptoms</p>
+                                                                <p className="text-2xl font-black text-slate-900 dark:text-white">{patterns.length}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-3">
+                                                            <p className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Frequency & Severity by Symptom</p>
+                                                            {patterns.map((pattern, idx) => (
+                                                                <div key={idx} className="bg-white dark:bg-rose-950/10 p-4 rounded-xl border border-rose-100 dark:border-rose-900/20">
+                                                                    <div className="flex items-start justify-between mb-2">
+                                                                        <p className="text-sm font-bold text-slate-900 dark:text-white">{pattern.symptom}</p>
+                                                                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                                                                            {pattern.frequency}x
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+                                                                        <span className="font-semibold">Avg: {pattern.avgSeverity}/10</span>
+                                                                        <span className="text-slate-400">Range: {pattern.minSeverity}-{pattern.maxSeverity}/10</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </div>
+                                </div>
+
+                                <div className="pl-3">
                                     <div className="bg-rose-50/30 dark:bg-black/20 p-5 rounded-2xl border border-rose-100 dark:border-rose-900/20">
                                         <p className="text-[10px] text-slate-500 uppercase font-black mb-1 tracking-widest">Focus Areas</p>
                                         <p className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-tight">
                                             {activeReport.focusAreas.join(', ')}
                                         </p>
                                     </div>
-                                    <div className="bg-rose-50/30 dark:bg-black/20 p-5 rounded-2xl border border-rose-100 dark:border-rose-900/20 flex items-center justify-between">
-                                        <div>
-                                            <p className="text-[10px] text-slate-500 uppercase font-black mb-1 tracking-widest">Provider Readiness</p>
-                                            <p className="text-xl font-black text-slate-900 dark:text-white">96%</p>
-                                        </div>
-                                        <span className="material-symbols-outlined text-emerald-500">verified</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <span className="font-black text-primary uppercase text-xs tracking-widest flex items-center gap-2">
-                                        <span className="w-1 h-3 bg-primary rounded-full"></span>
-                                        [A] Assessment:
-                                    </span>
-                                    <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed font-medium pl-3">
-                                        {activeReport.soapNote.assessment}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <span className="font-black text-primary uppercase text-xs tracking-widest flex items-center gap-2">
-                                        <span className="w-1 h-3 bg-primary rounded-full"></span>
-                                        [P] Plan:
-                                    </span>
-                                    <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed font-medium pl-3">
-                                        {activeReport.soapNote.plan}
-                                    </p>
                                 </div>
                             </div>
 
                             <footer className="p-6 bg-slate-50 dark:bg-black/20 border-t border-rose-100 dark:border-rose-900/20 flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                                 <span>Secured via Private Browser Sandbox</span>
                                 <div className="flex gap-4">
-                                    <button className="hover:text-primary transition-colors flex items-center gap-1">
+                                    <button 
+                                        onClick={handlePrintPDF}
+                                        disabled={!activeReport}
+                                        className="hover:text-primary transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
                                         <span className="material-symbols-outlined text-sm">print</span> Print PDF
                                     </button>
-                                    <button className="hover:text-primary transition-colors flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-sm">qr_code</span> Share Link
-                                    </button>
+                                    {activeReport && (
+                                        <Link 
+                                            to={`/qr-handshake/${activeReport.id}`}
+                                            className="hover:text-primary transition-colors flex items-center gap-1"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">qr_code</span> Share Link
+                                        </Link>
+                                    )}
                                 </div>
                             </footer>
                         </div>
@@ -591,16 +726,27 @@ const PrepHub: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-3 w-full sm:w-auto">
                                     <button 
-                                        onClick={() => setActiveReportId(report.id)}
+                                        onClick={() => {
+                                            setActiveReportId(report.id);
+                                            setTimeout(() => {
+                                                const previewSection = document.getElementById('active-report-preview');
+                                                if (previewSection) {
+                                                    previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                }
+                                            }, 100);
+                                        }}
                                         className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all border border-slate-200 dark:border-rose-900/40"
                                     >
                                         <span className="material-symbols-outlined text-lg">visibility</span>
                                         Preview
                                     </button>
-                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
+                                    <Link 
+                                        to={`/qr-handshake/${report.id}`}
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+                                    >
                                         <span className="material-symbols-outlined text-lg">qr_code</span>
                                         Vault Access
-                                    </button>
+                                    </Link>
                                     <button 
                                         onClick={() => removeReport(report.id)}
                                         className="p-2.5 text-slate-400 hover:text-red-500 transition-colors"

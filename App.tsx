@@ -8,6 +8,7 @@ import ChatAssistant from './pages/ChatAssistant';
 import PrepHub from './pages/PrepHub';
 import Logger from './pages/Logger';
 import Profile from './pages/Profile';
+import QRHandshake from './pages/QRHandshake';
 
 const navItems = [
     { name: 'Dashboard', icon: 'grid_view', path: '/' },
@@ -107,13 +108,15 @@ const MobileMenu = ({ isOpen, closeMenu }: { isOpen: boolean, closeMenu: () => v
     );
 };
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const location = useLocation();
+    const isQRHandshakePage = location.pathname.startsWith('/qr-handshake');
 
     return (
-        <HealthProvider>
-            <Router>
-                <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans">
+            {!isQRHandshakePage && (
+                <>
                     <Header toggleMobileMenu={() => setIsMobileMenuOpen(true)} />
                     <MobileMenu isOpen={isMobileMenuOpen} closeMenu={() => setIsMobileMenuOpen(false)} />
                     <Sidebar />
