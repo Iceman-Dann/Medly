@@ -300,6 +300,58 @@ const PrepHub: React.FC = () => {
         return range.toUpperCase();
     };
 
+    const getFilteredLogsForReport = (report: typeof reports[0]) => {
+        const now = Date.now();
+        let startCutoff = 0;
+        let endCutoff = now;
+        
+        if (report.timeRange === '7d') {
+            startCutoff = now - (7 * 24 * 60 * 60 * 1000);
+        } else if (report.timeRange === '30d') {
+            startCutoff = now - (30 * 24 * 60 * 60 * 1000);
+        } else if (report.timeRange === '3m') {
+            startCutoff = now - (90 * 24 * 60 * 60 * 1000);
+        } else if (report.timeRange.startsWith('custom:')) {
+            const dates = report.timeRange.replace('custom:', '').split('_');
+            if (dates.length === 2) {
+                const start = new Date(dates[0]);
+                start.setHours(0, 0, 0, 0);
+                startCutoff = start.getTime();
+                const end = new Date(dates[1]);
+                end.setHours(23, 59, 59, 999);
+                endCutoff = end.getTime();
+            }
+        }
+
+        return logs.filter(log => log.timestamp >= startCutoff && log.timestamp <= endCutoff);
+    };
+
+    const calculatePatterns = (filteredLogs: typeof logs) => {
+        const symptomMap = new Map<string, { count: number; totalSeverity: number; intensities: number[] }>();
+        
+        filteredLogs.forEach(log => {
+            const existing = symptomMap.get(log.name) || { count: 0, totalSeverity: 0, intensities: [] };
+            existing.count += 1;
+            existing.totalSeverity += log.intensity;
+            existing.intensities.push(log.intensity);
+            symptomMap.set(log.name, existing);
+        });
+
+        const patterns: Array<{ symptom: string; frequency: number; avgSeverity: number; minSeverity: number; maxSeverity: number }> = [];
+        
+        symptomMap.forEach((data, symptom) => {
+            patterns.push({
+                symptom,
+                frequency: data.count,
+                avgSeverity: Math.round((data.totalSeverity / data.count) * 10) / 10,
+                minSeverity: Math.min(...data.intensities),
+                maxSeverity: Math.max(...data.intensities)
+            });
+        });
+
+        return patterns.sort((a, b) => b.frequency - a.frequency);
+    };
+
     const activeReport = activeReportId 
         ? reports.find(r => r.id === activeReportId) 
         : reports[0];
