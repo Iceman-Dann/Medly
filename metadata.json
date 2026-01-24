@@ -1,0 +1,9 @@
+
+{
+  "name": "Symra - Medical Empowerment Assistant",
+  "description": "A secure, privacy-first medical symptom assistant that helps users track health trends, generate clinical SOAP notes for doctor visits, and use AI to prepare for appointments. All data is stored locally in your browser.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
