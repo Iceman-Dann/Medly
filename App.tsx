@@ -120,20 +120,33 @@ const AppContent: React.FC = () => {
                     <Header toggleMobileMenu={() => setIsMobileMenuOpen(true)} />
                     <MobileMenu isOpen={isMobileMenuOpen} closeMenu={() => setIsMobileMenuOpen(false)} />
                     <Sidebar />
-                    <main className="relative min-h-[calc(100vh-64px)] overflow-x-hidden">
-                        <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/logs" element={<Dashboard />} />
-                            <Route path="/chat" element={<ChatAssistant />} />
-                            <Route path="/prep" element={<PrepHub />} />
-                            <Route path="/log-new" element={<Logger />} />
-                            <Route path="/profile" element={<Profile />} />
-                        </Routes>
-                    </main>
-                    <footer className="p-8 border-t border-slate-200 dark:border-rose-900/20 lg:ml-64 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <p>Symra, RoseHack 2026</p>
-                    </footer>
-                </div>
+                </>
+            )}
+            <main className="relative min-h-[calc(100vh-64px)] overflow-x-hidden">
+                <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/logs" element={<Dashboard />} />
+                    <Route path="/chat" element={<ChatAssistant />} />
+                    <Route path="/prep" element={<PrepHub />} />
+                    <Route path="/log-new" element={<Logger />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/qr-handshake/:reportId?" element={<QRHandshake />} />
+                </Routes>
+            </main>
+            {!isQRHandshakePage && (
+                <footer className="p-8 border-t border-slate-200 dark:border-rose-900/20 lg:ml-64 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <p>Symra, RoseHack 2026</p>
+                </footer>
+            )}
+        </div>
+    );
+};
+
+const App: React.FC = () => {
+    return (
+        <HealthProvider>
+            <Router>
+                <AppContent />
             </Router>
         </HealthProvider>
     );
