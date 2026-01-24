@@ -1,0 +1,202 @@
+[
+  {
+    "id": "kb-001",
+    "title": "Understanding Menstrual Cycle Phases",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/menstrual-cycle/your-menstrual-cycle",
+    "tags": ["menstrual", "period", "cycle", "hormones", "ovulation"],
+    "text": "The menstrual cycle typically lasts 28 days and consists of four phases: menstrual (days 1-5), follicular (days 1-13), ovulation (day 14), and luteal (days 15-28). Hormonal changes during each phase can affect symptoms, energy levels, and mood. Tracking your cycle can help identify patterns in symptoms."
+  },
+  {
+    "id": "kb-002",
+    "title": "Common Causes of Pelvic Pain",
+    "source": "American College of Obstetricians and Gynecologists",
+    "url": "https://www.acog.org/womens-health/faqs/pelvic-pain",
+    "tags": ["pelvic pain", "lower abdominal", "discomfort", "cramping"],
+    "text": "Pelvic pain can have many causes including menstrual cramps, ovarian cysts, endometriosis, urinary tract infections, and pelvic inflammatory disease. The location, timing, and severity of pain can help healthcare providers determine the cause. Always discuss persistent or severe pelvic pain with a healthcare provider."
+  },
+  {
+    "id": "kb-003",
+    "title": "Urinary Tract Infections (UTIs) in Women",
+    "source": "Mayo Clinic",
+    "url": "https://www.mayoclinic.org/diseases-conditions/urinary-tract-infection/symptoms-causes/syc-20353447",
+    "tags": ["UTI", "urinary tract infection", "dysuria", "burning", "frequency"],
+    "text": "UTIs are common in women and can cause symptoms like frequent urination, burning sensation during urination (dysuria), cloudy or strong-smelling urine, and pelvic pressure. Risk factors include sexual activity, certain birth control methods, and anatomy. Early treatment is important to prevent complications."
+  },
+  {
+    "id": "kb-004",
+    "title": "Endometriosis: Symptoms and Diagnosis",
+    "source": "American College of Obstetricians and Gynecologists",
+    "url": "https://www.acog.org/womens-health/faqs/endometriosis",
+    "tags": ["endometriosis", "pelvic pain", "menstrual", "infertility"],
+    "text": "Endometriosis occurs when tissue similar to the uterine lining grows outside the uterus. Common symptoms include severe menstrual cramps, chronic pelvic pain, pain during intercourse, and infertility. Diagnosis often requires laparoscopy. Treatment options include pain management, hormonal therapy, and surgery."
+  },
+  {
+    "id": "kb-005",
+    "title": "Polycystic Ovary Syndrome (PCOS) Overview",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/polycystic-ovary-syndrome",
+    "tags": ["PCOS", "polycystic ovary", "hormones", "irregular periods", "infertility"],
+    "text": "PCOS is a hormonal disorder affecting reproductive-age women. Symptoms may include irregular or missed periods, excess androgen levels, polycystic ovaries, weight gain, and difficulty getting pregnant. Management focuses on lifestyle changes, hormonal birth control, and addressing specific symptoms."
+  },
+  {
+    "id": "kb-006",
+    "title": "Vaginal Health and Common Concerns",
+    "source": "American College of Obstetricians and Gynecologists",
+    "url": "https://www.acog.org/womens-health/faqs/vulvovaginal-health",
+    "tags": ["vaginal", "discharge", "yeast infection", "bacterial vaginosis", "irritation"],
+    "text": "Normal vaginal discharge varies throughout the cycle. Changes in color, odor, or consistency may indicate infection. Common conditions include yeast infections (itching, thick white discharge) and bacterial vaginosis (fishy odor, thin discharge). See a healthcare provider for proper diagnosis and treatment."
+  },
+  {
+    "id": "kb-007",
+    "title": "Menopause and Perimenopause Symptoms",
+    "source": "North American Menopause Society",
+    "url": "https://www.menopause.org/for-women/menopause-faqs",
+    "tags": ["menopause", "perimenopause", "hot flashes", "irregular periods", "hormones"],
+    "text": "Perimenopause typically begins in the 40s and can last several years. Symptoms include irregular periods, hot flashes, night sweats, mood changes, and sleep disturbances. Menopause is confirmed after 12 consecutive months without a period. Hormone therapy and lifestyle changes can help manage symptoms."
+  },
+  {
+    "id": "kb-008",
+    "title": "Fibroids: Types and Treatment Options",
+    "source": "Mayo Clinic",
+    "url": "https://www.mayoclinic.org/diseases-conditions/uterine-fibroids/symptoms-causes/syc-20354288",
+    "tags": ["fibroids", "uterine fibroids", "heavy bleeding", "pelvic pressure"],
+    "text": "Uterine fibroids are noncancerous growths in the uterus. Many women have no symptoms, but some experience heavy menstrual bleeding, pelvic pressure, frequent urination, and back pain. Treatment depends on symptoms and may include medication, minimally invasive procedures, or surgery."
+  },
+  {
+    "id": "kb-009",
+    "title": "Pelvic Inflammatory Disease (PID)",
+    "source": "Centers for Disease Control and Prevention",
+    "url": "https://www.cdc.gov/std/pid/stdfact-pid.htm",
+    "tags": ["PID", "pelvic inflammatory disease", "infection", "pelvic pain", "STI"],
+    "text": "PID is an infection of the female reproductive organs, often caused by sexually transmitted infections. Symptoms include lower abdominal pain, fever, unusual discharge, and pain during intercourse or urination. Early treatment with antibiotics is crucial to prevent complications like infertility."
+  },
+  {
+    "id": "kb-010",
+    "title": "Ovarian Cysts: When to Be Concerned",
+    "source": "American College of Obstetricians and Gynecologists",
+    "url": "https://www.acog.org/womens-health/faqs/ovarian-cysts",
+    "tags": ["ovarian cysts", "pelvic pain", "ovary", "rupture"],
+    "text": "Most ovarian cysts are harmless and resolve on their own. Functional cysts are common during the menstrual cycle. Symptoms may include pelvic pain, bloating, and pressure. Seek medical attention if you experience sudden severe pain, which could indicate a ruptured cyst or ovarian torsion."
+  },
+  {
+    "id": "kb-011",
+    "title": "Iron Deficiency Anemia in Women",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/iron-deficiency-anemia",
+    "tags": ["anemia", "iron deficiency", "fatigue", "heavy periods", "bleeding"],
+    "text": "Women are at higher risk for iron deficiency anemia due to blood loss during menstruation and pregnancy. Symptoms include fatigue, weakness, pale skin, shortness of breath, and dizziness. Heavy menstrual bleeding can contribute to iron deficiency. Treatment includes iron supplements and addressing the underlying cause."
+  },
+  {
+    "id": "kb-012",
+    "title": "Preparing for Your Gynecological Appointment",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/gynecologist-visit",
+    "tags": ["appointment", "doctor visit", "preparation", "advocacy", "questions"],
+    "text": "Before your appointment, track your symptoms, write down questions, bring a list of medications, and note your menstrual cycle dates. Be prepared to describe symptoms clearly: when they started, severity, triggers, and impact on daily life. Don't hesitate to ask for clarification or a second opinion if needed."
+  },
+  {
+    "id": "kb-013",
+    "title": "Menstrual Cramps: Causes and Relief",
+    "source": "Mayo Clinic",
+    "url": "https://www.mayoclinic.org/diseases-conditions/menstrual-cramps/symptoms-causes/syc-20374938",
+    "tags": ["cramping", "menstrual cramps", "dysmenorrhea", "pain", "period pain"],
+    "text": "Menstrual cramps (dysmenorrhea) are throbbing or cramping pains in the lower abdomen that occur before and during menstruation. Primary dysmenorrhea is common menstrual cramping without an underlying condition. Secondary dysmenorrhea is caused by a disorder in the reproductive organs. Treatment options include pain relievers, heat therapy, exercise, and hormonal birth control."
+  },
+  {
+    "id": "kb-014",
+    "title": "Fatigue in Women: Causes and Management",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/fatigue",
+    "tags": ["fatigue", "tiredness", "exhaustion", "energy", "weakness"],
+    "text": "Fatigue is a common complaint among women and can have many causes including hormonal changes, iron deficiency anemia, thyroid disorders, sleep problems, stress, and chronic conditions. Menstrual cycles, pregnancy, and menopause can all contribute to fatigue. Keeping a symptom diary, maintaining a regular sleep schedule, eating a balanced diet, and managing stress can help. See a healthcare provider if fatigue is severe or persistent."
+  },
+  {
+    "id": "kb-015",
+    "title": "PMS and Mood Changes",
+    "source": "American College of Obstetricians and Gynecologists",
+    "url": "https://www.acog.org/womens-health/faqs/premenstrual-syndrome-pms",
+    "tags": ["mood changes", "PMS", "premenstrual syndrome", "mood swings", "irritability", "depression"],
+    "text": "Premenstrual syndrome (PMS) includes physical and emotional symptoms that occur in the days before menstruation. Emotional symptoms can include mood swings, irritability, depression, anxiety, and difficulty concentrating. These symptoms are thought to be related to hormonal changes during the menstrual cycle. Lifestyle changes, stress management, and sometimes medication can help manage PMS symptoms."
+  },
+  {
+    "id": "kb-016",
+    "title": "Headaches and Hormones",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/headaches",
+    "tags": ["headache", "migraine", "hormones", "menstrual", "tension headache"],
+    "text": "Hormonal changes can trigger headaches in women, particularly around menstruation, ovulation, pregnancy, and menopause. Menstrual migraines are common and may be related to drops in estrogen. Keeping a headache diary to track patterns, managing stress, getting regular sleep, and avoiding triggers can help. Hormonal birth control may help or worsen headaches depending on the individual."
+  },
+  {
+    "id": "kb-017",
+    "title": "Bloating and Digestive Health in Women",
+    "source": "American College of Obstetricians and Gynecologists",
+    "url": "https://www.acog.org/womens-health/faqs/problems-of-the-digestive-system",
+    "tags": ["bloating", "digestive issues", "gas", "abdominal bloating", "constipation", "IBS"],
+    "text": "Bloating is a common symptom that can be related to hormonal changes during the menstrual cycle, digestive disorders like irritable bowel syndrome (IBS), food intolerances, or other medical conditions. Many women experience bloating before or during their period due to hormonal fluctuations. Keeping a food diary, eating smaller meals, staying hydrated, and regular exercise can help. Persistent or severe bloating should be evaluated by a healthcare provider."
+  },
+  {
+    "id": "kb-018",
+    "title": "Nausea and Vomiting: When to Seek Care",
+    "source": "Mayo Clinic",
+    "url": "https://www.mayoclinic.org/symptoms/nausea/basics/definition/sym-20050736",
+    "tags": ["nausea", "vomiting", "queasiness", "morning sickness", "digestive issues"],
+    "text": "Nausea is the feeling of wanting to vomit. In women, nausea can be related to menstrual cycle changes, pregnancy, medications, digestive disorders, or other conditions. Morning sickness during pregnancy is common. Persistent nausea, especially with other symptoms, should be evaluated. Treatment depends on the cause and may include dietary changes, medications, or addressing underlying conditions."
+  },
+  {
+    "id": "kb-019",
+    "title": "Abnormal Uterine Bleeding",
+    "source": "American College of Obstetricians and Gynecologists",
+    "url": "https://www.acog.org/womens-health/faqs/abnormal-uterine-bleeding",
+    "tags": ["bleeding", "heavy bleeding", "irregular bleeding", "menorrhagia", "spotting"],
+    "text": "Abnormal uterine bleeding includes heavy menstrual bleeding, bleeding between periods, irregular cycles, or bleeding after menopause. Causes can include hormonal imbalances, fibroids, polyps, bleeding disorders, medications, or other conditions. Heavy bleeding can lead to anemia. Treatment depends on the cause and may include hormonal therapy, medications, or procedures. Always discuss abnormal bleeding with a healthcare provider."
+  },
+  {
+    "id": "kb-020",
+    "title": "Breast Pain and Tenderness",
+    "source": "Mayo Clinic",
+    "url": "https://www.mayoclinic.org/diseases-conditions/breast-pain/symptoms-causes/syc-20350423",
+    "tags": ["breast tenderness", "breast pain", "mastalgia", "cyclical", "breast discomfort"],
+    "text": "Breast pain (mastalgia) is common in women and can be cyclical (related to menstrual cycle) or noncyclical. Cyclical breast pain typically occurs before menstruation and is related to hormonal changes. Noncyclical pain may be related to injury, infection, or other causes. Most breast pain is not a sign of breast cancer, but persistent or severe pain should be evaluated. Treatment may include supportive bras, pain relievers, or hormonal therapy."
+  },
+  {
+    "id": "kb-021",
+    "title": "Back Pain in Women",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/back-pain",
+    "tags": ["back pain", "lower back pain", "spine", "posture", "musculoskeletal"],
+    "text": "Back pain is common in women and can be related to menstrual cycles, pregnancy, osteoporosis, or other conditions. Lower back pain may worsen during menstruation due to hormonal changes and inflammation. Maintaining good posture, regular exercise, proper lifting techniques, and managing weight can help prevent back pain. Persistent or severe back pain should be evaluated by a healthcare provider."
+  },
+  {
+    "id": "kb-022",
+    "title": "Joint Pain and Arthritis in Women",
+    "source": "Arthritis Foundation",
+    "url": "https://www.arthritis.org/health-wellness/about-arthritis/understanding-arthritis/women-and-arthritis",
+    "tags": ["joint pain", "arthritis", "rheumatoid arthritis", "stiffness", "inflammation"],
+    "text": "Women are more likely than men to develop certain types of arthritis, including rheumatoid arthritis and lupus. Joint pain can also be related to hormonal changes, particularly around menopause when estrogen levels drop. Symptoms include joint pain, stiffness, swelling, and reduced range of motion. Early diagnosis and treatment are important. Treatment may include medications, physical therapy, lifestyle changes, and sometimes surgery."
+  },
+  {
+    "id": "kb-023",
+    "title": "Sleep Problems in Women",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/sleep-and-your-health",
+    "tags": ["sleep issues", "insomnia", "sleep problems", "sleep disturbances", "fatigue"],
+    "text": "Sleep problems are common in women and can be related to hormonal changes during the menstrual cycle, pregnancy, perimenopause, and menopause. Conditions like sleep apnea, restless legs syndrome, and insomnia can affect women differently than men. Good sleep hygiene includes maintaining a regular schedule, creating a comfortable sleep environment, avoiding screens before bed, and managing stress. Persistent sleep problems should be discussed with a healthcare provider."
+  },
+  {
+    "id": "kb-024",
+    "title": "Irritable Bowel Syndrome (IBS) in Women",
+    "source": "Mayo Clinic",
+    "url": "https://www.mayoclinic.org/diseases-conditions/irritable-bowel-syndrome/symptoms-causes/syc-20360016",
+    "tags": ["digestive issues", "IBS", "irritable bowel syndrome", "bloating", "abdominal pain", "constipation", "diarrhea"],
+    "text": "Irritable bowel syndrome (IBS) is more common in women than men and symptoms may worsen during menstruation. Symptoms include abdominal pain, bloating, gas, diarrhea, constipation, or alternating between the two. Hormonal changes can trigger or worsen IBS symptoms. Treatment focuses on dietary changes (like the low FODMAP diet), stress management, medications, and lifestyle modifications. A healthcare provider can help develop a personalized treatment plan."
+  },
+  {
+    "id": "kb-025",
+    "title": "Chronic Pain Conditions in Women",
+    "source": "Office on Women's Health",
+    "url": "https://www.womenshealth.gov/a-z-topics/chronic-pain",
+    "tags": ["pain", "chronic pain", "fibromyalgia", "pain management", "discomfort"],
+    "text": "Women are more likely than men to experience chronic pain conditions such as fibromyalgia, migraines, and certain types of arthritis. Chronic pain can significantly impact daily life and may be related to hormonal factors, genetics, or other underlying conditions. Treatment often involves a multidisciplinary approach including medications, physical therapy, psychological support, and lifestyle modifications. Working with healthcare providers to develop a comprehensive pain management plan is important."
+  }
+]

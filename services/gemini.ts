@@ -17,11 +17,9 @@ export class GeminiService {
         this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     }
 
-    async chat(message: string, recentLogs: SymptomLog[], history: ChatMessage[]) {
-        const contextString = recentLogs.length > 0 
-            ? `User's recent history: ${recentLogs.map(l => `${new Date(l.timestamp).toLocaleDateString()}: ${l.name} (Intensity: ${l.intensity}/10) - ${l.notes}`).join('; ')}`
-            : "User has no recent logs.";
-
+    async chat(message: string, recentLogs: SymptomLog[], history: ChatMessage[], customSystemPrompt?: string) {
+        const systemInstruction = customSystemPrompt || SYSTEM_PROMPT;
+        
         const historyContents = history.map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
@@ -31,10 +29,10 @@ export class GeminiService {
             model: 'gemini-3-flash-preview',
             contents: [
                 ...historyContents,
-                { role: 'user', parts: [{ text: `${contextString}\n\nUser: ${message}` }] }
+                { role: 'user', parts: [{ text: message }] }
             ],
             config: {
-                systemInstruction: SYSTEM_PROMPT,
+                systemInstruction,
                 temperature: 0.7,
             }
         });
