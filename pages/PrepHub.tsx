@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useHealth } from '../HealthContext';
+import { useFocusMode } from '../FocusModeContext';
 import { gemini } from '../services/openai';
 import { ClinicalReport } from '../types';
 import jsPDF from 'jspdf';
@@ -191,7 +192,8 @@ const CalendarView: React.FC<{
 };
 
 const PrepHub: React.FC = () => {
-    const { logs, reports, addReport, removeReport } = useHealth();
+    const { logs, reports, addReport, removeReport, medications } = useHealth();
+    const { focusMode, getFocusModeLabel } = useFocusMode();
     const [timeRange, setTimeRange] = useState<TimeRange>('7d');
     const [focusAreas, setFocusAreas] = useState<string[]>(['Pain Patterns', 'Cycle Correlation']);
     const [loading, setLoading] = useState(false);
@@ -200,6 +202,9 @@ const PrepHub: React.FC = () => {
     const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
     const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
     const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
+    const [customConcerns, setCustomConcerns] = useState<Array<{ question: string; reason: string }>>([]);
+    const [showCustomConcernInput, setShowCustomConcernInput] = useState<boolean>(false);
+    const [customConcernText, setCustomConcernText] = useState<string>('');
 
     const getFilteredLogs = (range: TimeRange) => {
         const now = Date.now();
@@ -251,9 +256,10 @@ const PrepHub: React.FC = () => {
                 ? `custom:${customStartDate.toISOString().split('T')[0]}_${customEndDate.toISOString().split('T')[0]}`
                 : timeRange;
             
+            const activeMeds = medications.filter(m => m.status === 'active');
             const [note, list] = await Promise.all([
-                gemini.generateSOAPNote(filteredLogs, areasToUse),
-                gemini.generateChecklist(filteredLogs, areasToUse)
+                gemini.generateSOAPNote(filteredLogs, areasToUse, activeMeds),
+                gemini.generateChecklist(filteredLogs, areasToUse, activeMeds)
             ]);
 
             await addReport({
@@ -283,6 +289,21 @@ const PrepHub: React.FC = () => {
         } else {
             setShowCustomInput(true);
         }
+    };
+
+    const handleAddCustomConcern = () => {
+        if (customConcernText.trim()) {
+            setCustomConcerns(prev => [...prev, {
+                question: customConcernText.trim(),
+                reason: 'Custom concern added by user'
+            }]);
+            setCustomConcernText('');
+            setShowCustomConcernInput(false);
+        }
+    };
+
+    const handleRemoveCustomConcern = (index: number) => {
+        setCustomConcerns(prev => prev.filter((_, i) => i !== index));
     };
 
     const formatTimeRange = (range: string) => {
@@ -460,6 +481,14 @@ const PrepHub: React.FC = () => {
                 <div className="flex flex-col gap-2">
                     <h1 className="text-4xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">Provider Prep Hub</h1>
                     <p className="text-slate-500 dark:text-slate-400 text-lg font-normal max-w-2xl">Streamline your next clinical visit with data-driven reports and customized talking points.</p>
+                    {focusMode && (
+                        <div className="mt-3 flex items-center gap-2 px-4 py-2 bg-primary/15 border-2 border-primary/30 rounded-xl shadow-sm">
+                            <span className="text-lg">🧭</span>
+                            <span className="text-sm font-black text-primary uppercase tracking-wider">
+                                Focus Mode During This Period: {getFocusModeLabel(focusMode)}
+                            </span>
+                        </div>
+                    )}
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full h-fit">
                     <span className="material-symbols-outlined text-primary text-[16px]">verified_user</span>
@@ -707,23 +736,88 @@ const PrepHub: React.FC = () => {
                             <span className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Smart Questions</span>
                         </div>
                         <div className="space-y-4">
-                            {(!activeReport || activeReport.checklist.length === 0) ? (
+                            {(!activeReport || activeReport.checklist.length === 0) && customConcerns.length === 0 ? (
                                 <p className="text-xs text-slate-400 italic">Generate a report to see tailored provider questions.</p>
-                            ) : activeReport.checklist.map((item, i) => (
-                                <label key={i} className="flex items-start gap-4 p-3 rounded-xl hover:bg-primary/5 transition-all cursor-pointer group border border-transparent hover:border-primary/10">
-                                    <input type="checkbox" className="mt-1 w-5 h-5 rounded border-rose-200 text-primary focus:ring-primary bg-transparent" />
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug mb-1 group-hover:text-primary transition-colors">
-                                            {item.question}
-                                        </p>
-                                        <p className="text-[10px] text-slate-500 leading-tight italic">Context: {item.reason}</p>
-                                    </div>
-                                </label>
-                            ))}
+                            ) : (
+                                <>
+                                    {activeReport?.checklist.map((item, i) => (
+                                        <label key={i} className="flex items-start gap-4 p-3 rounded-xl hover:bg-primary/5 transition-all cursor-pointer group border border-transparent hover:border-primary/10">
+                                            <input type="checkbox" className="mt-1 w-5 h-5 rounded border-rose-200 text-primary focus:ring-primary bg-transparent flex-shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug mb-1 group-hover:text-primary transition-colors break-words">
+                                                    {item.question}
+                                                </p>
+                                                <p className="text-[10px] text-slate-500 leading-tight italic break-words">Context: {item.reason}</p>
+                                            </div>
+                                        </label>
+                                    ))}
+                                    {customConcerns.map((concern, i) => (
+                                        <div key={`custom-${i}`} className="flex items-start gap-4 p-3 rounded-xl hover:bg-primary/5 transition-all group border border-primary/20 bg-primary/5">
+                                            <input type="checkbox" className="mt-1 w-5 h-5 rounded border-rose-200 text-primary focus:ring-primary bg-transparent flex-shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug mb-1 group-hover:text-primary transition-colors break-words">
+                                                    {concern.question}
+                                                </p>
+                                                <p className="text-[10px] text-slate-500 leading-tight italic break-words">Context: {concern.reason}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleRemoveCustomConcern(i)}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 dark:hover:bg-red-900/20 rounded text-red-500 flex-shrink-0"
+                                                title="Remove concern"
+                                            >
+                                                <span className="material-symbols-outlined text-sm">close</span>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
                         </div>
-                        <button className="w-full mt-6 py-3 border border-dashed border-rose-200 rounded-2xl text-slate-400 text-[10px] font-black uppercase tracking-widest hover:border-primary hover:text-primary transition-all">
-                            Add Custom Concern
-                        </button>
+                        {showCustomConcernInput ? (
+                            <div className="mt-6 space-y-3">
+                                <textarea
+                                    value={customConcernText}
+                                    onChange={(e) => setCustomConcernText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                            e.preventDefault();
+                                            handleAddCustomConcern();
+                                        } else if (e.key === 'Escape') {
+                                            setShowCustomConcernInput(false);
+                                            setCustomConcernText('');
+                                        }
+                                    }}
+                                    placeholder="Enter your custom concern or question... (Press Ctrl+Enter to submit)"
+                                    autoFocus
+                                    rows={4}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-primary/30 bg-white dark:bg-rose-950/10 text-sm font-medium text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y min-h-[100px]"
+                                />
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleAddCustomConcern}
+                                        disabled={!customConcernText.trim()}
+                                        className="flex-1 py-2.5 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Add
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowCustomConcernInput(false);
+                                            setCustomConcernText('');
+                                        }}
+                                        className="px-4 py-2.5 border border-rose-200 dark:border-rose-900/30 text-slate-500 rounded-xl text-xs font-black uppercase tracking-widest hover:border-primary hover:text-primary transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setShowCustomConcernInput(true)}
+                                className="w-full mt-6 py-3 border border-dashed border-rose-200 rounded-2xl text-slate-400 text-[10px] font-black uppercase tracking-widest hover:border-primary hover:text-primary transition-all"
+                            >
+                                Add Custom Concern
+                            </button>
+                        )}
                     </div>
 
                     <div className="bg-primary/5 dark:bg-primary/10 rounded-3xl p-8 border border-primary/10">

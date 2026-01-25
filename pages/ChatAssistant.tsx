@@ -1,7 +1,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useHealth } from '../HealthContext';
+import { useFocusMode } from '../FocusModeContext';
 import { getLogs, saveChatMessage, getChatHistory, getKBDocumentById } from '@/lib/db';
 import { redactPII, detectEmergencySymptoms } from '@/lib/sanitize';
 import { retrieveEvidence } from '@/lib/retrieval';
@@ -74,12 +76,14 @@ function getLogsForPatternAnalysis(allLogs: SymptomLog[]): Log[] {
 }
 
 const ChatAssistant: React.FC = () => {
-    const { isMedicalContextEnabled, setMedicalContextEnabled, logs } = useHealth();
+    const { isMedicalContextEnabled, setMedicalContextEnabled, logs, medications } = useHealth();
+    const { focusMode, getFocusModeLabel } = useFocusMode();
     const [messages, setMessages] = useState<EnhancedMessage[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
     const [patternCard, setPatternCard] = useState<PatternCard | null>(null);
     const [showEmergencyAlert, setShowEmergencyAlert] = useState(false);
+    const [showFocusModeHint, setShowFocusModeHint] = useState(false);
     const [threadId] = useState(() => crypto.randomUUID());
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -626,6 +630,20 @@ Tell me which symptom and what details you'd like to add.`;
                 systemPrompt = buildSystemPrompt(fallbackPatternCard, ragEvidence, recentLogEntries, computedStats);
             }
             
+            // Add focus mode context to system prompt if available
+            if (focusMode && systemPrompt) {
+                const focusModeContext = `\n\nFOCUS MODE CONTEXT:\nThe user has selected "${getFocusModeLabel(focusMode)}" as their current focus mode. When providing advice, prioritize information relevant to this life stage and health context. Focus mode ID: ${focusMode}`;
+                systemPrompt = systemPrompt + focusModeContext;
+            }
+
+            // Add medication context from profile when available (active meds only)
+            const activeMeds = medications.filter(m => m.status === 'active');
+            if (activeMeds.length > 0 && systemPrompt) {
+                const medLines = activeMeds.map(m => `- ${m.name}${m.dosage ? `, ${m.dosage}` : ''}${m.schedule ? ` (${m.schedule})` : ''}`).join('\n');
+                const medContext = `\n\nUSER_MEDICATIONS (from profile):\nThe user has listed these active medications. Use this context when discussing drug interactions, medication-related symptoms, Med Response focus, or when generating clinical summaries.\n${medLines}`;
+                systemPrompt = systemPrompt + medContext;
+            }
+            
             // Log what we're sending to the model (first 500 chars of system prompt for debugging)
             if (isMedical) {
                 console.log('[Chat] Sending to model:', {
@@ -633,6 +651,8 @@ Tell me which symptom and what details you'd like to add.`;
                     systemPromptLength: systemPrompt.length,
                     userMessage: redactedMessage.substring(0, 100),
                     hasComputedStats: !!computedStats,
+                    hasFocusMode: !!focusMode,
+                    focusMode: focusMode,
                     computedStatsPreview: computedStats ? JSON.stringify(computedStats).substring(0, 200) : 'none'
                 });
             }
@@ -786,6 +806,28 @@ Tell me which symptom and what details you'd like to add.`;
                             <span>Your messages are automatically redacted to remove personal information before being sent.</span>
                         </div>
                     </div>
+                    {focusMode && (
+                        <div className="mb-3 flex flex-col items-center justify-center gap-1">
+                            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowFocusModeHint((v) => !v)}
+                                    className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                    aria-label="About focus mode"
+                                >
+                                    <span className="material-symbols-outlined text-sm align-middle">info</span>
+                                </button>
+                                <span>
+                                    Using <span className="font-semibold text-slate-700 dark:text-slate-300">{getFocusModeLabel(focusMode)}</span> context
+                                </span>
+                            </div>
+                            {showFocusModeHint && (
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    You can set your focus mode in <Link to="/profile" className="font-semibold text-primary hover:underline">My Profile</Link>.
+                                </p>
+                            )}
+                        </div>
+                    )}
                     <div className="relative flex items-center">
                         <input 
                             value={input}

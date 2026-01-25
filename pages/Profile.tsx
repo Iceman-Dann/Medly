@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHealth } from '../HealthContext';
+import { useFocusMode } from '../FocusModeContext';
 import { HealthMode } from '../types';
 
 const modeOptions = [
@@ -28,13 +29,50 @@ const modeOptions = [
 
 const Profile: React.FC = () => {
     const { profile, medications, updateProfile, addMedication, removeMedication, toggleMedicationStatus } = useHealth();
+    const { setFocusMode } = useFocusMode();
     const [selectedMode, setSelectedMode] = useState<HealthMode>(profile.activeMode);
     const [isAddingMed, setIsAddingMed] = useState(false);
     const [newMed, setNewMed] = useState({ name: '', dosage: '', schedule: '' });
     const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
+    // Map HealthMode to FocusModeId
+    const mapHealthModeToFocusMode = (mode: HealthMode): 'menstrual' | 'fertility' | 'post_partum' | 'perimenopause' | null => {
+        switch (mode) {
+            case HealthMode.MENSTRUAL:
+                return 'menstrual';
+            case HealthMode.FERTILITY:
+                return 'fertility';
+            case HealthMode.POSTPARTUM:
+                return 'post_partum';
+            case HealthMode.PERIMENOPAUSE:
+                return 'perimenopause';
+            default:
+                return null;
+        }
+    };
+
+    // Sync focus mode when profile loads (if user already has an activeMode set)
+    useEffect(() => {
+        if (profile.activeMode && profile.activeMode !== HealthMode.GENERAL) {
+            const focusModeId = mapHealthModeToFocusMode(profile.activeMode);
+            if (focusModeId) {
+                setFocusMode(focusModeId);
+            }
+        }
+    }, [profile.activeMode, setFocusMode]);
+
+    const handleModeSelect = (mode: HealthMode) => {
+        setSelectedMode(mode);
+        // Update focus mode immediately when card is clicked
+        const focusModeId = mapHealthModeToFocusMode(mode);
+        setFocusMode(focusModeId);
+    };
+
     const handleSaveChanges = async () => {
         await updateProfile({ activeMode: selectedMode });
+        // Also ensure focus mode is set
+        const focusModeId = mapHealthModeToFocusMode(selectedMode);
+        setFocusMode(focusModeId);
         setSaveStatus('Changes saved to local vault');
         setTimeout(() => setSaveStatus(null), 3000);
     };
@@ -85,7 +123,7 @@ const Profile: React.FC = () => {
                     {modeOptions.map((opt) => (
                         <div 
                             key={opt.mode}
-                            onClick={() => setSelectedMode(opt.mode)}
+                            onClick={() => handleModeSelect(opt.mode)}
                             className={`group relative flex flex-col gap-3 p-5 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md ${
                                 selectedMode === opt.mode 
                                 ? 'border-primary bg-primary/5' 

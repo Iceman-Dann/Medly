@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { HealthProvider } from './HealthContext';
+import { FocusModeProvider } from './FocusModeContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Timeline from './pages/Timeline';
@@ -13,12 +14,12 @@ import Settings from './pages/Settings';
 import QRHandshake from './pages/QRHandshake';
 
 const navItems = [
-    { name: 'Dashboard', icon: 'grid_view', path: '/' },
+    { name: 'Dashboard', icon: 'home', path: '/' },
     { name: 'Your Logs', icon: 'calendar_today', path: '/logs' },
     { name: 'Symptom Log', icon: 'add_notes', path: '/log-new' },
-    { name: 'AI Chat Bot', icon: 'smart_toy', path: '/chat' },
-    { name: 'Clinical Report', icon: 'medical_information', path: '/prep' },
-    { name: 'Profile', icon: 'person', path: '/profile' },
+    { name: 'AI Assistant', icon: 'smart_toy', path: '/chat' },
+    { name: 'Doctor\'s Prep', icon: 'medical_information', path: '/prep' },
+    { name: 'My Profile', icon: 'person', path: '/profile' },
 ];
 
 const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
@@ -140,9 +141,11 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
     return (
         <HealthProvider>
-            <Router>
-                <AppContent />
-            </Router>
+            <FocusModeProvider>
+                <Router>
+                    <AppContent />
+                </Router>
+            </FocusModeProvider>
         </HealthProvider>
     );
 };

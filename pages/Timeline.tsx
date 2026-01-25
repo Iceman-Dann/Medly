@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHealth } from '../HealthContext';
+import { useFocusMode } from '../FocusModeContext';
 import { SymptomLog } from '../types';
 import { Link } from 'react-router-dom';
 
@@ -169,12 +170,21 @@ const LogEntry: React.FC<{ log: SymptomLog; index: number; total: number; isFirs
 
 const Timeline: React.FC = () => {
     const { logs } = useHealth();
+    const { focusMode, getFocusModeLabel } = useFocusMode();
 
     return (
         <div className="max-w-6xl mx-auto p-4 lg:p-8 lg:ml-64">
             <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div>
-                    <h2 className="text-3xl font-black tracking-tight mb-2">Timeline History</h2>
+                <div className="flex flex-col gap-3">
+                    <h2 className="text-3xl font-black tracking-tight">Timeline History</h2>
+                    {focusMode && (
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full w-fit">
+                            <span className="text-[14px]">🧭</span>
+                            <span className="text-primary text-[10px] font-bold uppercase tracking-widest">
+                                Focused on: {getFocusModeLabel(focusMode)}
+                            </span>
+                        </div>
+                    )}
                 </div>
                 <div className="flex items-center gap-3">
                     <Link 

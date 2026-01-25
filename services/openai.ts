@@ -1,6 +1,6 @@
 
 import OpenAI from 'openai';
-import { SymptomLog, ChatMessage } from "../types";
+import { SymptomLog, ChatMessage, Medication } from "../types";
 
 const SYSTEM_PROMPT = `You are Symra, an empathetic and professional medical empowerment assistant. 
 Your goal is to help users track symptoms, understand health trends, and prepare for doctor visits.
@@ -95,7 +95,7 @@ export class OpenAIService {
         }
     }
 
-    async generateSOAPNote(logs: SymptomLog[], focusAreas: string[]) {
+    async generateSOAPNote(logs: SymptomLog[], focusAreas: string[], medications: Medication[] = []) {
         const logsData = logs.map(l => ({
             date: new Date(l.timestamp).toLocaleDateString(),
             symptom: l.name,
@@ -104,13 +104,16 @@ export class OpenAIService {
         }));
 
         const focusText = focusAreas.length > 0 ? `Focus specifically on these areas: ${focusAreas.join(', ')}.` : '';
+        const medText = medications.length > 0
+            ? `The user has listed these active medications (include in Subjective when relevant): ${medications.map(m => `${m.name}${m.dosage ? ` ${m.dosage}` : ''}${m.schedule ? ` (${m.schedule})` : ''}`).join('; ')}.`
+            : '';
         const client = this.getClient();
 
         const response = await client.chat.completions.create({
             model: 'gpt-4o-mini',
             messages: [
                 { role: 'system', content: SYSTEM_PROMPT + ' Always respond with valid JSON when requested.' },
-                { role: 'user', content: `Generate a clinical SOAP note (Subjective, Objective, Assessment, Plan) based on these logs: ${JSON.stringify(logsData)}. ${focusText} Focus on clinical advocacy. Return ONLY valid JSON with the following structure: {"subjective": "...", "objective": "...", "assessment": "...", "plan": "..."}` }
+                { role: 'user', content: `Generate a clinical SOAP note (Subjective, Objective, Assessment, Plan) based on these logs: ${JSON.stringify(logsData)}. ${focusText} ${medText} Focus on clinical advocacy. Return ONLY valid JSON with the following structure: {"subjective": "...", "objective": "...", "assessment": "...", "plan": "..."}` }
             ],
             temperature: 0.7,
             response_format: { type: 'json_object' }
@@ -125,15 +128,18 @@ export class OpenAIService {
         }
     }
 
-    async generateChecklist(logs: SymptomLog[], focusAreas: string[]) {
+    async generateChecklist(logs: SymptomLog[], focusAreas: string[], medications: Medication[] = []) {
         const focusText = focusAreas.length > 0 ? `Include specific concerns about: ${focusAreas.join(', ')}.` : '';
+        const medText = medications.length > 0
+            ? `The user takes these medications: ${medications.map(m => `${m.name}${m.dosage ? ` ${m.dosage}` : ''}${m.schedule ? ` (${m.schedule})` : ''}`).join('; ')}. Consider medication-related questions (e.g. interactions, efficacy, timing) when relevant.`
+            : '';
         const client = this.getClient();
 
         const response = await client.chat.completions.create({
             model: 'gpt-4o-mini',
             messages: [
                 { role: 'system', content: SYSTEM_PROMPT + ' Always respond with valid JSON when requested.' },
-                { role: 'user', content: `Based on these symptom logs: ${JSON.stringify(logs)}, generate 4 smart questions the user should ask their healthcare provider to better understand their condition. ${focusText} Return ONLY valid JSON as an object with a "questions" array: {"questions": [{"question": "...", "reason": "..."}]}` }
+                { role: 'user', content: `Based on these symptom logs: ${JSON.stringify(logs)}, generate 4 smart questions the user should ask their healthcare provider to better understand their condition. ${focusText} ${medText} Return ONLY valid JSON as an object with a "questions" array: {"questions": [{"question": "...", "reason": "..."}]}` }
             ],
             temperature: 0.7,
             response_format: { type: 'json_object' }
