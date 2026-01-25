@@ -1,15 +1,25 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useHealth } from '../HealthContext';
 import { getLogs, saveChatMessage, getChatHistory, getKBDocumentById } from '@/lib/db';
 import { redactPII, detectEmergencySymptoms } from '@/lib/sanitize';
 import { retrieveEvidence } from '@/lib/retrieval';
 import { buildPatternCard } from '@/lib/patterns/buildPatternCard';
-import { buildSystemPrompt } from '@/lib/chat/systemPrompt';
+import { buildSystemPrompt, type LogReviewStats } from '@/lib/chat/systemPrompt';
+import { classifyIntent, extractDaysFromReviewRequest, extractComparisonPeriod, extractDaysForUnderstandPatterns, detectUnderstandPatternsIntent, detectComparePeriodIntent, detectAddDetailIntent } from '@/lib/chat/intentClassifier';
+import { getLogsFromLastNDays, computeLogStatistics } from '@/lib/chat/logStats';
 import { ensureKnowledgeBaseSeeded } from '@/lib/kb/seed';
 import { EmergencyAlert } from '@/components/EmergencyAlert';
 import { gemini } from '../services/gemini';
 import type { SymptomLog, Log, PatternCard, RagEvidence, KBDocument, ChatMessage } from '../types';
+
+// Configuration constants for log analysis limits
+// Gemini 2.0 Flash supports ~1M tokens, so we can use much more data
+const PATTERN_ANALYSIS_DAYS = 180; // Analyze patterns over last 6 months
+const MAX_PATTERN_LOGS = 500; // Maximum logs to use for pattern card (safety limit)
+const MAX_REVIEW_LOGS = 500; // Maximum individual log entries to include in review
+const MAX_CHAT_HISTORY = 20; // Maximum chat history messages to include
 
 interface EnhancedMessage extends ChatMessage {
     citations?: string[];
@@ -43,6 +53,26 @@ function convertSymptomLogsToLogs(symptomLogs: SymptomLog[]): Log[] {
     });
 }
 
+/**
+ * Get logs for pattern analysis (time-based window)
+ */
+function getLogsForPatternAnalysis(allLogs: SymptomLog[]): Log[] {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - PATTERN_ANALYSIS_DAYS);
+    cutoffDate.setHours(0, 0, 0, 0);
+    
+    // Filter logs within the time window
+    const filteredLogs = allLogs.filter(log => {
+        const logDate = new Date(log.timestamp);
+        logDate.setHours(0, 0, 0, 0);
+        return logDate >= cutoffDate;
+    });
+    
+    // Convert and limit to max
+    const converted = convertSymptomLogsToLogs(filteredLogs);
+    return converted.slice(0, MAX_PATTERN_LOGS);
+}
+
 const ChatAssistant: React.FC = () => {
     const { isMedicalContextEnabled, setMedicalContextEnabled, logs } = useHealth();
     const [messages, setMessages] = useState<EnhancedMessage[]>([]);
@@ -60,10 +90,11 @@ const ChatAssistant: React.FC = () => {
                 await ensureKnowledgeBaseSeeded();
 
                 if (isMedicalContextEnabled) {
-                    const logsForPattern = convertSymptomLogsToLogs(logs.slice(0, 30));
+                    const logsForPattern = getLogsForPatternAnalysis(logs);
                     if (logsForPattern.length > 0) {
                         const card = buildPatternCard(logsForPattern);
                         setPatternCard(card);
+                        console.log(`[Pattern] Built pattern card from ${logsForPattern.length} logs (last ${PATTERN_ANALYSIS_DAYS} days)`);
                     }
                 }
 
@@ -88,11 +119,38 @@ const ChatAssistant: React.FC = () => {
         }
     }, [messages, isStreaming]);
 
-    const handleSend = async () => {
-        if (!input.trim() || isStreaming) return;
+    // Helper function to detect if a message is medical-related
+    const isMedicalQuery = (message: string): boolean => {
+        const lowerMessage = message.toLowerCase().trim();
+        
+        // Simple greetings or casual conversation
+        const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'thanks', 'thank you', 'bye', 'goodbye'];
+        if (greetings.some(g => lowerMessage === g || lowerMessage.startsWith(g + ' '))) {
+            return false;
+        }
+        
+        // Medical/symptom-related keywords
+        const medicalKeywords = [
+            'symptom', 'pain', 'ache', 'discomfort', 'bleeding', 'cramp', 'cycle', 'period', 'menstrual',
+            'pelvic', 'abdominal', 'nausea', 'dizziness', 'fever', 'fatigue', 'mood', 'depression',
+            'anxiety', 'doctor', 'physician', 'medical', 'health', 'diagnosis', 'condition', 'treatment',
+            'medication', 'log', 'track', 'pattern', 'severity', 'intensity', 'phase', 'ovulation',
+            'luteal', 'follicular', 'discharge', 'infection', 'uti', 'yeast', 'bacterial', 'endometriosis',
+            'pcos', 'pms', 'premenstrual', 'irregular', 'heavy', 'spotting', 'bloating', 'headache',
+            'migraine', 'back pain', 'breast', 'tenderness', 'sleep', 'insomnia', 'digestive', 'ibs'
+        ];
+        
+        return medicalKeywords.some(keyword => lowerMessage.includes(keyword));
+    };
 
-        const userMessage = input.trim();
-        setInput('');
+    const handleSend = async (messageOverride?: string) => {
+        const messageToSend = messageOverride || input.trim();
+        if (!messageToSend || isStreaming) return;
+
+        const userMessage = messageToSend;
+        if (!messageOverride) {
+            setInput('');
+        }
 
         if (detectEmergencySymptoms(userMessage)) {
             setShowEmergencyAlert(true);
@@ -132,12 +190,15 @@ const ChatAssistant: React.FC = () => {
         try {
             let currentPatternCard = patternCard;
             let ragEvidence: RagEvidence[] = [];
+            const isMedical = isMedicalQuery(userMessage);
 
-            if (isMedicalContextEnabled) {
-                const logsForPattern = convertSymptomLogsToLogs(logs.slice(0, 30));
+            // Only retrieve medical context if the query is medical-related
+            if (isMedical && isMedicalContextEnabled) {
+                const logsForPattern = getLogsForPatternAnalysis(logs);
                 if (logsForPattern.length > 0) {
                     currentPatternCard = buildPatternCard(logsForPattern);
                     setPatternCard(currentPatternCard);
+                    console.log(`[Pattern] Using ${logsForPattern.length} logs for pattern analysis`);
                     ragEvidence = await retrieveEvidence(userMessage, currentPatternCard, 8);
                 } else {
                     // Even without logs, try to retrieve evidence from the user message
@@ -163,8 +224,8 @@ const ChatAssistant: React.FC = () => {
                     };
                     ragEvidence = await retrieveEvidence(userMessage, emptyPatternCard, 8);
                 }
-            } else {
-                // Even when medical context is disabled, try to retrieve evidence from user message
+            } else if (isMedical && !isMedicalContextEnabled) {
+                // Medical query but context disabled - still try to retrieve evidence
                 const emptyPatternCard: PatternCard = {
                     time_window_days: 0,
                     top_symptoms: [],
@@ -193,25 +254,411 @@ const ChatAssistant: React.FC = () => {
             const citationIds = ragEvidence.map(ev => ev.id);
             console.log('Citation IDs:', citationIds);
 
-            const historyForGemini = messages.slice(-10).map(m => ({
+            const historyForGemini = messages.slice(-MAX_CHAT_HISTORY).map(m => ({
                 id: m.id,
                 role: m.role,
                 content: m.content,
                 timestamp: m.timestamp,
             }));
 
-            let systemPrompt = '';
-            if (currentPatternCard && ragEvidence.length > 0) {
-                systemPrompt = buildSystemPrompt(currentPatternCard, ragEvidence);
+            // Classify user intent
+            const intent = classifyIntent(userMessage);
+            const isReviewingLogs = intent === 'review_recent';
+            const isUnderstandingPatterns = intent === 'understand_patterns';
+            
+            // Also check if message contains review keywords (fallback detection)
+            const reviewKeywords = /review|synthesize|summarize|analyze|last\s+(\d+)?\s*(hours?|days?)/i;
+            const hasReviewKeywords = reviewKeywords.test(userMessage);
+
+            // Get recent log entries if user is asking to review logs or understand patterns
+            let recentLogEntries: Log[] | undefined = undefined;
+            let computedStats: LogReviewStats | undefined = undefined;
+            
+            if (isReviewingLogs || hasReviewKeywords || isUnderstandingPatterns) {
+                // Get number of days from request
+                // understand_patterns defaults to 7 days, review_recent defaults to 3 days
+                const daysToFetch = isUnderstandingPatterns 
+                    ? extractDaysForUnderstandPatterns(userMessage)
+                    : extractDaysFromReviewRequest(userMessage);
+                
+                // Convert all logs first
+                const allConvertedLogs = convertSymptomLogsToLogs(logs);
+                
+                // Get logs from last N LOGGED days (not calendar days)
+                recentLogEntries = getLogsFromLastNDays(allConvertedLogs, daysToFetch);
+                
+                // Compute statistics
+                if (recentLogEntries.length > 0) {
+                    const stats = computeLogStatistics(recentLogEntries);
+                    computedStats = {
+                        symptomStats: stats.symptomStats.map(s => ({
+                            symptomType: s.symptomType,
+                            count: s.count,
+                            avgSeverity: s.avgSeverity,
+                        })),
+                        maxSeverityOverall: stats.maxSeverityOverall,
+                        maxSeveritySymptom: stats.maxSeveritySymptom,
+                        phaseWithMaxSeverity: stats.phaseWithMaxSeverity,
+                        totalDays: stats.totalDays,
+                    };
+                    const requestType = isUnderstandingPatterns ? 'Understand patterns' : 'Review';
+                    console.log(`[Chat] ${requestType} request: ${recentLogEntries.length} entries from last ${computedStats.totalDays} logged days`);
+                    console.log(`[Chat] Computed stats:`, {
+                        symptomStats: computedStats.symptomStats,
+                        maxSeverity: computedStats.maxSeverityOverall,
+                        maxSeveritySymptom: computedStats.maxSeveritySymptom,
+                        phaseWithMaxSeverity: computedStats.phaseWithMaxSeverity
+                    });
+                    console.log(`[Chat] Actual log entries:`, recentLogEntries.map(log => ({
+                        symptom: log.symptomType,
+                        severity: log.severity,
+                        date: log.createdAt.toLocaleDateString(),
+                        phase: log.cyclePhase
+                    })));
+                } else {
+                    console.log(`[Chat] ${isUnderstandingPatterns ? 'Understand patterns' : 'Review'} request: No logs found for last ${daysToFetch} logged days`);
+                }
             }
 
-            const fullResponse = await gemini.chat(
+            // Build system prompt for medical queries
+            // Include log entries if user is reviewing logs, even if pattern card is empty
+            let systemPrompt = '';
+            if (isMedical) {
+                // Handle follow-up intents for review actions
+                if (intent === 'understand_patterns') {
+                    // User clicked "Understand my symptom patterns" or "Explain what these patterns may suggest"
+                    // If this is the initial request (not a follow-up), show patterns summary first
+                    // If computedStats exists, this is the initial request - show patterns summary
+                    if (computedStats && recentLogEntries) {
+                        // Initial request: show patterns summary immediately
+                        systemPrompt = buildSystemPrompt(
+                            currentPatternCard || {
+                                time_window_days: 0,
+                                top_symptoms: [],
+                                cycle_association: {
+                                    tracked_ratio: 0,
+                                    by_phase: {
+                                        menstrual: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                        follicular: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                        ovulation: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                        luteal: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                        unknown: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                    },
+                                },
+                                context_tags: { top_tags: [], tag_symptom_links: [] },
+                                triggers: { top_triggers: [], trigger_symptom_links: [] },
+                                meds: { top_meds: [] },
+                                red_flags_detected: [],
+                                notes_quality: { pct_present: 0, pii_risk: 'low' },
+                                narrative_bullets: [],
+                            },
+                            ragEvidence,
+                            recentLogEntries,
+                            computedStats
+                        );
+                    } else {
+                        // Follow-up request: provide interpretation
+                        systemPrompt = `You are a women's health self-advocacy assistant. The user wants to understand what their symptom patterns may suggest.
+
+CRITICAL RULES:
+1) Do NOT diagnose. Use cautious language ("could be consistent with", "one possibility", "worth discussing with a clinician", "may warrant evaluation").
+2) Provide suggested questions the user should ask their clinician.
+3) Reference the PATTERN_CARD and RECENT_LOG_ENTRIES for context.
+4) Do NOT include emergency disclaimers or red-flag warnings unless the user explicitly asks about danger or urgency.
+5) Keep it concise and action-oriented.
+
+OUTPUT FORMAT:
+## What these patterns may suggest (not a diagnosis)
+- [Cautious interpretation based on patterns]
+- [Possible associations, using "could be", "may indicate", "worth ruling out"]
+
+## Questions to ask your clinician
+- [Specific, actionable questions based on the patterns]
+
+PATTERN_CARD:
+${JSON.stringify(currentPatternCard || {}, null, 2)}
+
+Remember: Be cautious, non-diagnostic, supportive, and concise.`;
+                    }
+                } else if (intent === 'compare_period') {
+                    // User clicked "Compare this to a longer time period"
+                    // Extract period from message, default to 7 days if not specified
+                    const compareDays = extractComparisonPeriod(userMessage);
+                    
+                    // Get comparison logs - automatically run the comparison
+                    const allConvertedLogs = convertSymptomLogsToLogs(logs);
+                    let comparisonLogs: Log[] = [];
+                    let comparisonStats: ReturnType<typeof computeLogStatistics> | undefined = undefined;
+                    
+                    if (compareDays === 'full') {
+                        comparisonLogs = allConvertedLogs;
+                        comparisonStats = computeLogStatistics(comparisonLogs);
+                    } else {
+                        comparisonLogs = getLogsFromLastNDays(allConvertedLogs, compareDays);
+                        comparisonStats = computeLogStatistics(comparisonLogs);
+                    }
+                    
+                    // Format comparison stats for prompt
+                    const comparisonStatsJson = comparisonStats
+                        ? JSON.stringify({
+                            symptomStats: comparisonStats.symptomStats.map(s => ({
+                                symptomType: s.symptomType,
+                                count: s.count,
+                                avgSeverity: s.avgSeverity,
+                            })),
+                            maxSeverityOverall: comparisonStats.maxSeverityOverall,
+                            maxSeveritySymptom: comparisonStats.maxSeveritySymptom,
+                            phaseWithMaxSeverity: comparisonStats.phaseWithMaxSeverity,
+                            totalDays: comparisonStats.totalDays,
+                        }, null, 2)
+                        : 'No comparison stats available';
+                    
+                    const periodDescription = compareDays === 'full' 
+                        ? 'full history' 
+                        : `last ${compareDays} logged days`;
+                    
+                    systemPrompt = `You are a women's health self-advocacy assistant. The user wants to compare recent symptom patterns to a longer time period.
+
+CRITICAL: Do NOT ask for permission to access logs. The user's request is implicit consent. Immediately provide the comparison.
+
+Compare the RECENT_STATS (from last few days) to COMPARISON_STATS (from ${periodDescription}).
+
+OUTPUT FORMAT:
+## Comparison Summary
+- Recent period: [days] logged days, [symptom counts]
+- Comparison period: [days] logged days, [symptom counts]
+
+## Changes Over Time
+Formatting rules for this section:
+1) NEVER show "+/-0", "+0", or "-0" - these are not changes
+2) When count is unchanged: say "[Symptom name]: remained stable ([count] times in both periods)" or "[Symptom name]: unchanged ([count] times)"
+3) When count changes: show "[Symptom name]: [recent count] → [comparison count] ([increase/decrease] by [X])"
+4) When severity is unchanged: say "Average severity remained stable at [X]/10" or "Average severity: unchanged ([X]/10)"
+5) When severity changes: show "Average severity: [recent]/10 → [comparison]/10 ([increase/decrease] by [X]/10)"
+6) Group unchanged symptoms: "The following symptoms remained stable: [list] ([count] times each)"
+7) Only show numeric deltas when there is an actual increase or decrease
+8) Prioritize clarity - avoid repetition, group similar changes together
+
+Example format:
+- [Symptom with increase]: [recent count] → [comparison count] (increased by [X])
+- [Symptom with decrease]: [recent count] → [comparison count] (decreased by [X])
+- [Symptom unchanged]: remained stable ([count] times in both periods)
+- Average severity trends: [describe overall pattern - increased/decreased/stable]
+- Frequency: [describe if symptoms are more/less frequent overall]
+
+If multiple symptoms are unchanged, group them:
+- The following symptoms remained stable: [Symptom A], [Symptom B] ([count] times each)
+
+## What this suggests
+- [Pattern interpretation based on changes]
+
+RECENT_STATS:
+${computedStats ? JSON.stringify(computedStats, null, 2) : 'No recent stats available'}
+
+COMPARISON_STATS:
+${comparisonStatsJson}
+
+Remember: Do NOT ask "Please confirm" or "I need to access" - just provide the comparison immediately.`;
+                } else if (intent === 'add_detail') {
+                    // User clicked "Add more detail to a specific symptom"
+                    systemPrompt = `You are a women's health self-advocacy assistant. The user wants to add more detail to a specific symptom.
+
+Ask them which symptom they'd like to add more detail about, and what kind of details:
+- Timing (when it occurs, duration)
+- Triggers (what seems to cause it)
+- Associated symptoms (what else happens with it)
+- Severity patterns (does it vary throughout the day/cycle)
+
+OUTPUT FORMAT:
+Which symptom would you like to add more detail about? I can help you track:
+- Timing and duration patterns
+- Potential triggers
+- Associated symptoms
+- Severity variations
+
+Tell me which symptom and what details you'd like to add.`;
+                } else if (isReviewingLogs || hasReviewKeywords || isUnderstandingPatterns || (computedStats && recentLogEntries)) {
+                    // Review recent logs or understand patterns - use computed stats
+                    // Also handle case where stats were computed but intent wasn't detected
+                    // Always build system prompt for review/understand requests, even if logs are empty
+                    console.log('[Chat] Building review/understand system prompt:', { 
+                        isReviewingLogs, 
+                        isUnderstandingPatterns,
+                        hasReviewKeywords, 
+                        hasComputedStats: !!computedStats, 
+                        hasRecentLogs: !!recentLogEntries,
+                        computedStatsPreview: computedStats ? JSON.stringify(computedStats).substring(0, 200) : 'none'
+                    });
+                    const patternCardToUse = currentPatternCard || {
+                        time_window_days: 0,
+                        top_symptoms: [],
+                        cycle_association: {
+                            tracked_ratio: 0,
+                            by_phase: {
+                                menstrual: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                follicular: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                ovulation: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                luteal: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                unknown: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            },
+                        },
+                        context_tags: { top_tags: [], tag_symptom_links: [] },
+                        triggers: { top_triggers: [], trigger_symptom_links: [] },
+                        meds: { top_meds: [] },
+                        red_flags_detected: [],
+                        notes_quality: { pct_present: 0, pii_risk: 'low' },
+                        narrative_bullets: [],
+                    };
+                    console.log('[Chat] Building system prompt for log review:', {
+                        hasRecentLogs: !!recentLogEntries,
+                        logCount: recentLogEntries?.length || 0,
+                        hasComputedStats: !!computedStats,
+                        intent
+                    });
+                    systemPrompt = buildSystemPrompt(patternCardToUse, ragEvidence, recentLogEntries, computedStats);
+                } else {
+                    // Normal case: always build system prompt for medical queries
+                    // Use empty pattern card if none exists
+                    const patternCardToUse = currentPatternCard || {
+                        time_window_days: 0,
+                        top_symptoms: [],
+                        cycle_association: {
+                            tracked_ratio: 0,
+                            by_phase: {
+                                menstrual: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                follicular: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                ovulation: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                luteal: { count: 0, avg_severity: 0, top_symptoms: [] },
+                                unknown: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            },
+                        },
+                        context_tags: { top_tags: [], tag_symptom_links: [] },
+                        triggers: { top_triggers: [], trigger_symptom_links: [] },
+                        meds: { top_meds: [] },
+                        red_flags_detected: [],
+                        notes_quality: { pct_present: 0, pii_risk: 'low' },
+                        narrative_bullets: [],
+                    };
+                    systemPrompt = buildSystemPrompt(patternCardToUse, ragEvidence, recentLogEntries);
+                }
+            }
+            
+            // Debug logging
+            if (isMedical) {
+                console.log('[Chat] System prompt status:', {
+                    hasSystemPrompt: !!systemPrompt,
+                    systemPromptLength: systemPrompt.length,
+                    intent,
+                    isReviewingLogs,
+                    hasReviewKeywords,
+                    hasRecentLogs: !!recentLogEntries,
+                    hasComputedStats: !!computedStats,
+                    hasPatternCard: !!currentPatternCard,
+                    ragEvidenceCount: ragEvidence.length,
+                    containsComputedStats: systemPrompt.includes('COMPUTED_STATISTICS')
+                });
+            }
+
+            // CRITICAL: If computedStats exists, we MUST use the review format
+            // This ensures the system prompt is built even if intent detection failed
+            if (isMedical && computedStats && !systemPrompt.includes('COMPUTED_STATISTICS')) {
+                console.warn('[Chat] WARNING: Computed stats exist but system prompt doesn\'t include them! Rebuilding...', {
+                    intent,
+                    isReviewingLogs,
+                    hasReviewKeywords,
+                    hasRecentLogs: !!recentLogEntries,
+                    systemPromptLength: systemPrompt.length
+                });
+                const patternCardToUse = currentPatternCard || {
+                    time_window_days: 0,
+                    top_symptoms: [],
+                    cycle_association: {
+                        tracked_ratio: 0,
+                        by_phase: {
+                            menstrual: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            follicular: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            ovulation: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            luteal: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            unknown: { count: 0, avg_severity: 0, top_symptoms: [] },
+                        },
+                    },
+                    context_tags: { top_tags: [], tag_symptom_links: [] },
+                    triggers: { top_triggers: [], trigger_symptom_links: [] },
+                    meds: { top_meds: [] },
+                    red_flags_detected: [],
+                    notes_quality: { pct_present: 0, pii_risk: 'low' },
+                    narrative_bullets: [],
+                };
+                systemPrompt = buildSystemPrompt(patternCardToUse, ragEvidence, recentLogEntries, computedStats);
+            }
+            
+            // Validate system prompt is set for medical queries
+            if (isMedical && !systemPrompt) {
+                console.error('[Chat] ERROR: Medical query but system prompt is empty!', {
+                    intent,
+                    isReviewingLogs,
+                    hasReviewKeywords,
+                    hasRecentLogs: !!recentLogEntries,
+                    hasPatternCard: !!currentPatternCard,
+                    hasComputedStats: !!computedStats
+                });
+                // Fallback: build a minimal system prompt
+                const fallbackPatternCard = currentPatternCard || {
+                    time_window_days: 0,
+                    top_symptoms: [],
+                    cycle_association: {
+                        tracked_ratio: 0,
+                        by_phase: {
+                            menstrual: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            follicular: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            ovulation: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            luteal: { count: 0, avg_severity: 0, top_symptoms: [] },
+                            unknown: { count: 0, avg_severity: 0, top_symptoms: [] },
+                        },
+                    },
+                    context_tags: { top_tags: [], tag_symptom_links: [] },
+                    triggers: { top_triggers: [], trigger_symptom_links: [] },
+                    meds: { top_meds: [] },
+                    red_flags_detected: [],
+                    notes_quality: { pct_present: 0, pii_risk: 'low' },
+                    narrative_bullets: [],
+                };
+                systemPrompt = buildSystemPrompt(fallbackPatternCard, ragEvidence, recentLogEntries, computedStats);
+            }
+            
+            // Log what we're sending to the model (first 500 chars of system prompt for debugging)
+            if (isMedical) {
+                console.log('[Chat] Sending to model:', {
+                    systemPromptPreview: systemPrompt.substring(0, 500) + (systemPrompt.length > 500 ? '...' : ''),
+                    systemPromptLength: systemPrompt.length,
+                    userMessage: redactedMessage.substring(0, 100),
+                    hasComputedStats: !!computedStats,
+                    computedStatsPreview: computedStats ? JSON.stringify(computedStats).substring(0, 200) : 'none'
+                });
+            }
+            
+            let fullResponse = '';
+            
+            // Stream the response and update UI incrementally
+            for await (const chunk of gemini.chatStream(
                 redactedMessage,
                 [],
                 historyForGemini,
                 systemPrompt
-            );
+            )) {
+                fullResponse += chunk;
+                // Update the message content as chunks arrive
+                setMessages(prev => prev.map(m => 
+                    m.id === assistantMsgId 
+                        ? { 
+                            ...m, 
+                            content: fullResponse,
+                        }
+                        : m
+                ));
+            }
 
+            // Final update with all metadata
             setMessages(prev => prev.map(m => 
                 m.id === assistantMsgId 
                     ? { 
@@ -234,9 +681,12 @@ const ChatAssistant: React.FC = () => {
             });
         } catch (error) {
             console.error('Chat error:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Full error details:', errorMessage);
+            
             setMessages(prev => prev.map(m => 
                 m.id === assistantMsgId 
-                    ? { ...m, content: "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again later." }
+                    ? { ...m, content: `I'm sorry, I encountered an error: ${errorMessage}. Please try again later.` }
                     : m
             ));
         } finally {
@@ -303,10 +753,10 @@ const ChatAssistant: React.FC = () => {
                                 How can I help you understand your symptoms today? I can analyze your logs, explain clinical terms, or help you prepare questions for your doctor.
                             </p>
                             <div className="flex flex-wrap justify-center gap-2">
-                                {["Review my last 3 days", "Help me describe pelvic pain", "Prepare for my OBGYN visit"].map(q => (
+                                {["Review my last 3 days", "Help me describe pelvic pain", "Understand my symptom patterns"].map(q => (
                                     <button 
                                         key={q}
-                                        onClick={() => setInput(q)}
+                                        onClick={() => handleSend(q)}
                                         className="text-xs font-semibold px-4 py-2 bg-white dark:bg-rose-950/20 border border-primary/20 rounded-full hover:bg-primary hover:text-white transition-all"
                                     >
                                         {q}
@@ -317,7 +767,7 @@ const ChatAssistant: React.FC = () => {
                     )}
 
                     {messages.map((msg) => (
-                        <MessageWithCitations message={msg} />
+                        <MessageWithCitations key={msg.id} message={msg} onActionClick={handleSend} />
                     ))}
                     {isStreaming && (
                         <div className="flex gap-4 animate-pulse">
@@ -361,7 +811,7 @@ const ChatAssistant: React.FC = () => {
     );
 };
 
-function MessageWithCitations({ message }: { message: EnhancedMessage }) {
+function MessageWithCitations({ message, onActionClick }: { message: EnhancedMessage; onActionClick?: (action: string) => void }) {
     const [citations, setCitations] = useState<KBDocument[]>([]);
     const [loadingCitations, setLoadingCitations] = useState(false);
     const [sourcesExpanded, setSourcesExpanded] = useState(false);
@@ -394,40 +844,6 @@ function MessageWithCitations({ message }: { message: EnhancedMessage }) {
         }
     }, [message.citations, message.role, message.id]);
 
-    const parseResponseSections = (content: string) => {
-        const sections: Record<string, string[]> = {};
-        const lines = content.split('\n');
-        let currentSection: string | null = null;
-        let currentItems: string[] = [];
-
-        for (const line of lines) {
-            const sectionMatch = line.match(/^##\s+(.+)$/);
-            if (sectionMatch) {
-                if (currentSection) {
-                    sections[currentSection] = currentItems;
-                }
-                currentSection = sectionMatch[1];
-                currentItems = [];
-            } else if (line.trim().startsWith('- ')) {
-                currentItems.push(line.trim().substring(2));
-            } else if (line.trim() && currentSection) {
-                currentItems.push(line.trim());
-            }
-        }
-        if (currentSection) {
-            sections[currentSection] = currentItems;
-        }
-
-        if (Object.keys(sections).length === 0) {
-            return null;
-        }
-
-        return sections;
-    };
-
-    const sections = message.role === 'assistant' && message.content 
-        ? parseResponseSections(message.content) 
-        : null;
 
     return (
         <div className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -461,29 +877,79 @@ function MessageWithCitations({ message }: { message: EnhancedMessage }) {
                     ? 'bg-primary text-white rounded-tr-none' 
                     : 'bg-white dark:bg-rose-950/20 border border-primary/10 text-slate-800 dark:text-slate-100 rounded-tl-none'
                 }`}>
-                    {sections ? (
-                        <div className="space-y-4 text-sm">
-                            {Object.entries(sections).map(([sectionTitle, items]) => (
-                                <div key={sectionTitle} className="space-y-2">
-                                    <h3 className="font-semibold text-base">{sectionTitle}</h3>
-                                    <ul className="space-y-1.5 list-disc list-inside">
-                                        {items.map((item, idx) => (
-                                            <li key={idx} className="text-sm">{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
+                    {message.content ? (
+                        <div className="text-sm leading-relaxed">
+                            <ReactMarkdown
+                                components={{
+                                    h2: ({node, ...props}) => <h2 className="font-semibold text-lg mt-6 mb-4 text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2" {...props} />,
+                                    h3: ({node, ...props}) => <h3 className="font-semibold text-base mt-4 mb-3 text-slate-900 dark:text-slate-100" {...props} />,
+                                    p: ({node, ...props}) => <p className="text-slate-700 dark:text-slate-300 my-2 leading-relaxed" {...props} />,
+                                    ul: ({node, ...props}) => <ul className="list-none pl-0 my-3 space-y-2.5" {...props} />,
+                                    ol: ({node, ...props}) => <ol className="list-decimal pl-6 my-2 space-y-1" {...props} />,
+                                    li: ({node, ...props}) => {
+                                        // Extract text content from React nodes
+                                        const extractText = (children: any): string => {
+                                            if (typeof children === 'string') return children;
+                                            if (Array.isArray(children)) {
+                                                return children.map(extractText).join('');
+                                            }
+                                            if (children && typeof children === 'object' && 'props' in children) {
+                                                return extractText(children.props?.children || '');
+                                            }
+                                            return '';
+                                        };
+                                        
+                                        const content = props.children;
+                                        const contentStr = extractText(content);
+                                        
+                                        const isNextStep = contentStr.includes('Explain what these symptom patterns') ||
+                                            contentStr.includes('Compare this period');
+                                        
+                                        if (isNextStep && onActionClick) {
+                                            return (
+                                                <li className="my-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (contentStr.includes('Explain what these symptom patterns')) {
+                                                                onActionClick('Explain what these symptom patterns may suggest');
+                                                            } else if (contentStr.includes('Compare this period')) {
+                                                                onActionClick('Compare this period to a longer history of logs');
+                                                            }
+                                                        }}
+                                                        className="w-full text-left px-4 py-3 bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20 border border-primary/20 dark:border-primary/30 rounded-lg transition-all hover:shadow-sm group cursor-pointer"
+                                                    >
+                                                        <span className="text-slate-900 dark:text-slate-100 font-medium group-hover:text-primary transition-colors">{content}</span>
+                                                    </button>
+                                                </li>
+                                            );
+                                        }
+                                        
+                                        // Format symptom summary items with better styling
+                                        const isSymptomSummary = contentStr.includes('occurrence(s)') && contentStr.includes('average severity');
+                                        if (isSymptomSummary) {
+                                            return (
+                                                <li className="flex items-center justify-between py-2.5 px-4 my-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                                    <span className="text-slate-900 dark:text-slate-100">{content}</span>
+                                                </li>
+                                            );
+                                        }
+                                        
+                                        return <li className="text-slate-700 dark:text-slate-300 my-1.5 pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-primary before:font-bold" {...props} />;
+                                    },
+                                    strong: ({node, ...props}) => <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />,
+                                    a: ({node, ...props}) => <a className="text-primary hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                                    code: ({node, ...props}) => <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded" {...props} />,
+                                }}
+                            >
+                                {message.content}
+                            </ReactMarkdown>
                         </div>
                     ) : (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                            {message.content || (
-                                <span className="inline-flex items-center gap-1">
-                                    <span className="w-2 h-2 bg-current rounded-full animate-bounce"></span>
-                                    <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                                    <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                                </span>
-                            )}
-                        </p>
+                        <span className="inline-flex items-center gap-1">
+                            <span className="w-2 h-2 bg-current rounded-full animate-bounce"></span>
+                            <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
+                            <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                        </span>
                     )}
                     <p className={`text-[9px] mt-2 opacity-60 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
                         {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

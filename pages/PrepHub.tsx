@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useHealth } from '../HealthContext';
-import { gemini } from '../services/gemini';
+import { gemini } from '../services/openai';
 import { ClinicalReport } from '../types';
 import jsPDF from 'jspdf';
 
