@@ -997,7 +997,7 @@ function MessageWithCitations({ message, onActionClick }: { message: EnhancedMes
                 )}
             </div>
             {message.role === 'user' && (
-                <div className="size-10 rounded-full bg-cover bg-center shrink-0 border-2 border-primary/30" style={{ backgroundImage: `url('https://picsum.photos/seed/user/100')` }}></div>
+                <span className="mdi mdi-incognito-circle text-slate-500 dark:text-slate-400 text-3xl shrink-0"></span>
             )}
         </div>
     );

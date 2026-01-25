@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -16,6 +17,8 @@
                     colors: {
                         primary: "#ee2b8c",
                         "primary-dark": "#db2777",
+                        "rose-accent": "#fb7185",
+                        "blush": "#fff1f2",
                         "soft-pink": "#fdf2f8",
                         "dusty-rose": "#fda4af",
                         "background-light": "#f8f6f7",
@@ -47,6 +50,12 @@
         }
         .dark ::-webkit-scrollbar-thumb {
             background: #4a2b3d;
+        }
+        .qr-glow {
+            box-shadow: 0 10px 30px rgba(238, 43, 140, 0.08);
+        }
+        .modal-shadow {
+            box-shadow: 0 20px 50px -12px rgba(238, 43, 140, 0.12);
         }
     </style>
 </head>

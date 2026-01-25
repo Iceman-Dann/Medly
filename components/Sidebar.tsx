@@ -14,7 +14,7 @@ const Sidebar: React.FC = () => {
     const location = useLocation();
 
     return (
-        <aside className="w-64 hidden lg:flex flex-col bg-white dark:bg-background-dark border-r border-slate-200 dark:border-rose-900/20 h-full fixed left-0 top-0 pt-20 pb-10 px-6">
+        <aside className="w-64 hidden lg:flex flex-col bg-white dark:bg-background-dark border-r border-slate-200 dark:border-rose-900/20 h-full fixed left-0 top-0 pt-20 pb-10 px-6 z-40">
             <nav className="flex flex-col gap-2 flex-grow">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
@@ -36,9 +36,9 @@ const Sidebar: React.FC = () => {
             </nav>
             <div className="pt-6 border-t border-slate-200 dark:border-rose-900/20">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="size-10 rounded-full bg-cover bg-center border border-slate-200 dark:border-rose-900/40" style={{ backgroundImage: `url('https://picsum.photos/seed/user/100')` }}></div>
+                    <span className="mdi mdi-incognito-circle text-slate-500 dark:text-slate-400 text-3xl"></span>
                     <div>
-                        <p className="text-sm font-semibold">User Profile</p>
+                        <p className="text-sm font-semibold">Anonymous User</p>
                         <p className="text-[10px] font-black uppercase text-primary tracking-widest">Private Vault</p>
                     </div>
                 </div>

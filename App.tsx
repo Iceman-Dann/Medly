@@ -8,6 +8,7 @@ import ChatAssistant from './pages/ChatAssistant';
 import PrepHub from './pages/PrepHub';
 import Logger from './pages/Logger';
 import Profile from './pages/Profile';
+import QRHandshake from './pages/QRHandshake';
 
 const navItems = [
     { name: 'Dashboard', icon: 'grid_view', path: '/' },
@@ -50,18 +51,20 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
                     ))}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-0 sm:gap-3">
                     <div className="hidden sm:flex flex-col items-end mr-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
-                        <div className="flex items-center gap-1.5">
-                            <span className="relative flex h-2 w-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1 whitespace-nowrap">Status</p>
+                        <div className="flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="relative flex h-2 w-2 shrink-0">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
                             <span className="text-[10px] font-bold text-emerald-500 uppercase">Vault Secured</span>
                         </div>
                     </div>
-                    <Link to="/profile" className="size-9 rounded-full bg-cover bg-center border-2 border-primary/20 shadow-sm transition-transform hover:scale-110 active:scale-95" style={{ backgroundImage: `url('https://picsum.photos/seed/user/100')` }}></Link>
+                    <Link to="/profile" className="transition-transform hover:scale-110 active:scale-95 p-1.5 sm:p-0 -mr-1 sm:mr-0">
+                        <span className="mdi mdi-incognito-circle text-slate-500 dark:text-slate-400 text-2xl"></span>
+                    </Link>
                 </div>
             </div>
         </header>
@@ -105,35 +108,45 @@ const MobileMenu = ({ isOpen, closeMenu }: { isOpen: boolean, closeMenu: () => v
     );
 };
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const location = useLocation();
+    const isQRHandshakePage = location.pathname.startsWith('/qr-handshake');
 
     return (
-        <HealthProvider>
-            <Router>
-                <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans">
+            {!isQRHandshakePage && (
+                <>
                     <Header toggleMobileMenu={() => setIsMobileMenuOpen(true)} />
                     <MobileMenu isOpen={isMobileMenuOpen} closeMenu={() => setIsMobileMenuOpen(false)} />
                     <Sidebar />
-                    <main className="relative min-h-[calc(100vh-64px)] overflow-x-hidden">
-                        <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/logs" element={<Dashboard />} />
-                            <Route path="/chat" element={<ChatAssistant />} />
-                            <Route path="/prep" element={<PrepHub />} />
-                            <Route path="/log-new" element={<Logger />} />
-                            <Route path="/profile" element={<Profile />} />
-                        </Routes>
-                    </main>
-                    <footer className="p-8 border-t border-slate-200 dark:border-rose-900/20 lg:ml-64 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <p>© 2024 Symra Health Advocacy. All rights reserved.</p>
-                        <div className="flex gap-6">
-                            <a href="#" className="hover:text-primary">Privacy Policy</a>
-                            <a href="#" className="hover:text-primary">Terms of Service</a>
-                            <a href="#" className="hover:text-primary">Medical Disclaimer</a>
-                        </div>
-                    </footer>
-                </div>
+                </>
+            )}
+            <main className="relative min-h-[calc(100vh-64px)] overflow-x-hidden">
+                <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/logs" element={<Dashboard />} />
+                    <Route path="/chat" element={<ChatAssistant />} />
+                    <Route path="/prep" element={<PrepHub />} />
+                    <Route path="/log-new" element={<Logger />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/qr-handshake/:reportId?" element={<QRHandshake />} />
+                </Routes>
+            </main>
+            {!isQRHandshakePage && (
+                <footer className="p-8 border-t border-slate-200 dark:border-rose-900/20 lg:ml-64 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <p>Symra, RoseHack 2026</p>
+                </footer>
+            )}
+        </div>
+    );
+};
+
+const App: React.FC = () => {
+    return (
+        <HealthProvider>
+            <Router>
+                <AppContent />
             </Router>
         </HealthProvider>
     );
