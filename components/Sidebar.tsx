@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
                         <p className="text-[10px] font-black uppercase text-primary tracking-widest">Private Vault</p>
                     </div>
                 </div>
-                <Link to="/profile" className="w-full py-2 bg-slate-100 dark:bg-rose-950/30 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors">
+                <Link to="/settings" className="w-full py-2 bg-slate-100 dark:bg-rose-950/30 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors">
                     <span className="material-symbols-outlined text-[18px]">settings</span>
                     Settings
                 </Link>

@@ -9,6 +9,7 @@ import ChatAssistant from './pages/ChatAssistant';
 import PrepHub from './pages/PrepHub';
 import Logger from './pages/Logger';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import QRHandshake from './pages/QRHandshake';
 
 const navItems = [
@@ -123,6 +124,7 @@ const AppContent: React.FC = () => {
                     <Route path="/prep" element={<PrepHub />} />
                     <Route path="/log-new" element={<Logger />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/settings" element={<Settings />} />
                     <Route path="/qr-handshake/:reportId?" element={<QRHandshake />} />
                 </Routes>
             </main>
