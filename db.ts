@@ -212,3 +212,19 @@ export const importAllData = async (jsonString: string): Promise<void> => {
         }
     });
 };
+
+export const deleteAllData = async (): Promise<void> => {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_LOGS, STORE_PROFILE, STORE_MEDS, STORE_REPORTS], 'readwrite');
+        
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+
+        transaction.objectStore(STORE_LOGS).clear();
+        transaction.objectStore(STORE_PROFILE).clear();
+        transaction.objectStore(STORE_MEDS).clear();
+        transaction.objectStore(STORE_REPORTS).clear();
+    });
+};

@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useHealth } from '../HealthContext';
-import { exportAllData, importAllData } from '../db';
+import { exportAllData, importAllData, deleteAllData } from '../db';
 
 const Settings: React.FC = () => {
     const { logs, medications, reports, profile } = useHealth();
     const [isExporting, setIsExporting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [importError, setImportError] = useState<string | null>(null);
     const [importSuccess, setImportSuccess] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
     const [lastExportDate, setLastExportDate] = useState<string | null>(null);
     const [storageUsage, setStorageUsage] = useState({ used: 0, total: 5 });
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,6 +109,20 @@ const Settings: React.FC = () => {
         }
     };
 
+    const handleDeleteAll = async () => {
+        setIsDeleting(true);
+        setDeleteError(null);
+        try {
+            await deleteAllData();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } catch (error: any) {
+            setDeleteError(error.message || 'Failed to delete data');
+            setIsDeleting(false);
+        }
+    };
+
     const storagePercent = storageUsage.total > 0 ? (storageUsage.used / storageUsage.total) * 100 : 0;
 
     return (
@@ -201,6 +218,66 @@ const Settings: React.FC = () => {
                             >
                                 {isImporting ? 'Importing...' : 'Select JSON File'}
                             </button>
+                        </div>
+                    </section>
+
+                    <section className="bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 p-8 rounded-2xl transition-all">
+                        <div className="flex items-start justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-red-100/60 dark:bg-red-900/20 rounded-lg">
+                                    <span className="material-symbols-outlined text-red-500 dark:text-red-400">delete_forever</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-red-500 dark:text-red-400">Delete All Data</h4>
+                            </div>
+                            <span className="text-[10px] font-bold text-red-400 dark:text-red-500/70 uppercase tracking-widest">Irreversible</span>
+                        </div>
+                        <div className="max-w-2xl">
+                            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+                                Permanently delete all your symptom logs, medications, reports, and profile data from your local storage. This action cannot be undone. Make sure you have exported a backup before proceeding.
+                            </p>
+                            {deleteError && (
+                                <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl text-sm text-red-600 dark:text-red-400">
+                                    {deleteError}
+                                </div>
+                            )}
+                            {!showDeleteConfirm ? (
+                                <button 
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="flex items-center gap-3 px-8 py-3 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all shadow-sm"
+                                >
+                                    <span className="material-symbols-outlined">delete_forever</span>
+                                    Delete All Data
+                                </button>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl">
+                                        <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">⚠️ Warning: This will permanently delete all your data</p>
+                                        <p className="text-xs text-red-500 dark:text-red-500/70">
+                                            This includes all symptom logs ({logs.length} entries), medications ({medications.length} entries), reports ({reports.length} entries), and profile settings. This action cannot be undone.
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <button 
+                                            onClick={handleDeleteAll}
+                                            disabled={isDeleting}
+                                            className="flex items-center gap-3 px-8 py-3 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <span className="material-symbols-outlined">delete_forever</span>
+                                            {isDeleting ? 'Deleting...' : 'Confirm Delete All'}
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                setShowDeleteConfirm(false);
+                                                setDeleteError(null);
+                                            }}
+                                            disabled={isDeleting}
+                                            className="px-6 py-3 bg-slate-100 dark:bg-rose-muted/20 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-bold hover:bg-slate-200 dark:hover:bg-rose-muted/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </section>
 
