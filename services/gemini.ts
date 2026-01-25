@@ -14,7 +14,7 @@ export class GeminiService {
     private ai: GoogleGenAI;
 
     constructor() {
-        const apiKey = process.env.API_KEY || '';
+        const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
         if (!apiKey) {
             console.error('Gemini API key is not set. Please set GEMINI_API_KEY environment variable.');
             throw new Error('Gemini API key is required. Please set GEMINI_API_KEY in GitHub Secrets.');
