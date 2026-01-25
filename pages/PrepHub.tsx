@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useHealth } from '../HealthContext';
-import { gemini } from '../services/gemini';
+import { gemini } from '../services/openai';
 import { ClinicalReport } from '../types';
 
 type TimeRange = '7d' | '30d' | '3m' | 'custom';

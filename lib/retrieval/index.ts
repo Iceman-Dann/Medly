@@ -107,28 +107,48 @@ function expandQuery(query: string): string[] {
 /**
  * Calculate keyword score for a document
  * Title and tags are boosted (3x and 2x respectively)
+ * Supports weighted terms (for prioritizing user message over pattern context)
+ * Condition names in title get massive boost (10x)
  */
 function calculateScore(
   doc: KBDocument,
-  queryTerms: string[]
+  queryTerms: string[],
+  termWeights?: Map<string, number>,
+  conditionNames?: string[]
 ): number {
   let score = 0;
   const text = doc.text.toLowerCase();
   const title = doc.title.toLowerCase();
   const tags = doc.tags.map(t => t.toLowerCase());
   
+  // Massive boost if condition name appears in title (10x multiplier)
+  if (conditionNames && conditionNames.length > 0) {
+    for (const condition of conditionNames) {
+      const conditionLower = condition.toLowerCase();
+      if (title.includes(conditionLower)) {
+        score += 50; // Huge boost for exact condition match in title
+      }
+      // Also check tags
+      if (tags.some(tag => tag.includes(conditionLower))) {
+        score += 20; // Big boost for condition in tags
+      }
+    }
+  }
+  
   for (const term of queryTerms) {
+    const weight = termWeights?.get(term) || 1;
+    
     // Title matches (3x weight)
     const titleMatches = (title.match(new RegExp(term, 'gi')) || []).length;
-    score += titleMatches * 3;
+    score += titleMatches * 3 * weight;
     
     // Tag matches (2x weight)
     const tagMatches = tags.filter(tag => tag.includes(term) || term.includes(tag)).length;
-    score += tagMatches * 2;
+    score += tagMatches * 2 * weight;
     
     // Text matches (1x weight)
     const textMatches = (text.match(new RegExp(term, 'gi')) || []).length;
-    score += textMatches;
+    score += textMatches * weight;
   }
   
   return score;
@@ -190,58 +210,149 @@ function extractExcerpt(text: string, maxSentences: number = 4): string {
 }
 
 /**
- * Retrieve evidence in RagEvidence format, combining user message, pattern card, and cycle phase
+ * Extract specific condition names from query (PCOS, endometriosis, UTI, etc.)
+ */
+function extractConditionNames(query: string): string[] {
+  const conditions: string[] = [];
+  const queryLower = query.toLowerCase();
+  
+  // Common condition patterns
+  const conditionPatterns = [
+    { pattern: /\b(pcos|polycystic ovary syndrome)\b/i, name: 'PCOS' },
+    { pattern: /\b(endometriosis|endo)\b/i, name: 'endometriosis' },
+    { pattern: /\b(uti|urinary tract infection)\b/i, name: 'UTI' },
+    { pattern: /\b(pid|pelvic inflammatory disease)\b/i, name: 'PID' },
+    { pattern: /\b(ibs|irritable bowel syndrome)\b/i, name: 'IBS' },
+    { pattern: /\b(anemia|iron deficiency)\b/i, name: 'anemia' },
+    { pattern: /\b(arthritis|joint pain)\b/i, name: 'arthritis' },
+    { pattern: /\b(yeast infection|candidiasis)\b/i, name: 'yeast infection' },
+    { pattern: /\b(bv|bacterial vaginosis)\b/i, name: 'bacterial vaginosis' },
+  ];
+  
+  for (const { pattern, name } of conditionPatterns) {
+    if (pattern.test(query)) {
+      conditions.push(name);
+    }
+  }
+  
+  return conditions;
+}
+
+/**
+ * Retrieve evidence in RagEvidence format, prioritizing user message over pattern card context
+ * Uses weighted scoring to ensure user query terms are much more important than pattern context
+ * Applies strict relevance filtering to avoid returning generic sources
  */
 export async function retrieveEvidence(
   userMessage: string,
   patternCard: PatternCard,
   topN: number = 8
 ): Promise<RagEvidence[]> {
-  // Build enhanced query from user message + pattern context
-  const queryParts: string[] = [userMessage];
-
-  // Add top symptoms
-  if (patternCard.top_symptoms.length > 0) {
-    const topSymptoms = patternCard.top_symptoms.slice(0, 3).map(s => s.name);
-    queryParts.push(...topSymptoms);
-  }
-
-  // Add top tags
-  if (patternCard.context_tags.top_tags.length > 0) {
-    const topTags = patternCard.context_tags.top_tags.slice(0, 3).map(t => t.tag);
-    queryParts.push(...topTags);
-  }
-
-  // Add cycle phase if relevant
-  if (patternCard.cycle_association.highest_severity_phase) {
-    queryParts.push(patternCard.cycle_association.highest_severity_phase);
-  }
-
-  const enhancedQuery = queryParts.join(' ');
-
-  // Retrieve documents using existing logic
   const allDocs = await getAllKBDocuments();
   
   if (allDocs.length === 0) {
     return [];
   }
 
-  // Expand query with synonyms
-  const expandedTerms = expandQuery(enhancedQuery);
+  // Step 1: Extract specific condition names from query (if any)
+  const conditionNames = extractConditionNames(userMessage);
 
-  // Score all documents
+  // Step 2: Expand user message terms with synonyms (HIGH WEIGHT = 5.0)
+  const userMessageTerms = expandQuery(userMessage);
+  const termWeights = new Map<string, number>();
+  userMessageTerms.forEach(term => termWeights.set(term, 5.0));
+
+  // Step 3: Collect pattern card context terms (LOW WEIGHT = 0.5) - only if they're relevant
+  const patternTerms: string[] = [];
+  
+  // Only add pattern context if it's actually relevant to the user's query
+  // Check if user message mentions symptoms, cycle, or related terms
+  const userLower = userMessage.toLowerCase();
+  const isCycleRelated = /cycle|period|menstrual|phase|ovulation|luteal|follicular/i.test(userLower);
+  const isSymptomRelated = /symptom|pain|ache|discomfort|cramp|bleeding/i.test(userLower);
+  
+  // Don't add pattern context if user is asking about a specific condition
+  // (they want info about the condition, not their pattern)
+  if (conditionNames.length === 0) {
+    if (isSymptomRelated && patternCard.top_symptoms.length > 0) {
+      const topSymptoms = patternCard.top_symptoms.slice(0, 2).map(s => s.name.toLowerCase());
+      topSymptoms.forEach(symptom => {
+        const symptomTerms = expandQuery(symptom);
+        symptomTerms.forEach(term => {
+          if (!termWeights.has(term)) {
+            termWeights.set(term, 0.5);
+            patternTerms.push(term);
+          }
+        });
+      });
+    }
+    
+    if (isCycleRelated && patternCard.cycle_association.highest_severity_phase) {
+      const phase = patternCard.cycle_association.highest_severity_phase.toLowerCase();
+      const phaseTerms = expandQuery(phase);
+      phaseTerms.forEach(term => {
+        if (!termWeights.has(term)) {
+          termWeights.set(term, 0.5);
+          patternTerms.push(term);
+        }
+      });
+    }
+  }
+
+  // Combine all terms for scoring
+  const allQueryTerms = [...userMessageTerms, ...patternTerms];
+
+  // Step 4: Score all documents with weighted terms and condition boost
   const scored = allDocs.map(doc => ({
     doc,
-    score: calculateScore(doc, expandedTerms),
+    score: calculateScore(doc, allQueryTerms, termWeights, conditionNames),
   }));
 
-  // Filter out zero-score documents and sort by score
-  const relevant = scored
+  // Step 5: Filter and apply strict relevance threshold
+  // Only keep documents with score > 0 AND at least 40% of the top score (stricter!)
+  const sorted = scored
     .filter(item => item.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topN);
+    .sort((a, b) => b.score - a.score);
 
-  // Convert to RagEvidence format
+  if (sorted.length === 0) {
+    console.log('[RAG] No documents scored above 0 for query:', userMessage);
+    return [];
+  }
+
+  const topScore = sorted[0].score;
+  // Stricter threshold: 40% of top score, or minimum 5 (increased from 2)
+  const relevanceThreshold = Math.max(5, topScore * 0.4);
+
+  // If a specific condition was mentioned, be even more strict
+  // Only return documents that mention the condition in title/tags OR score very high
+  let relevant = sorted.filter(item => item.score >= relevanceThreshold);
+  
+  if (conditionNames.length > 0) {
+    // For condition-specific queries, prioritize documents that mention the condition
+    const conditionDocs = relevant.filter(item => {
+      const titleLower = item.doc.title.toLowerCase();
+      const tagsLower = item.doc.tags.map(t => t.toLowerCase()).join(' ');
+      return conditionNames.some(condition => 
+        titleLower.includes(condition.toLowerCase()) || 
+        tagsLower.includes(condition.toLowerCase())
+      );
+    });
+    
+    // If we found condition-specific docs, prefer those (but still apply threshold)
+    if (conditionDocs.length > 0) {
+      relevant = conditionDocs;
+    }
+  }
+
+  // Limit to topN
+  relevant = relevant.slice(0, topN);
+
+  console.log('[RAG] Query:', userMessage);
+  console.log('[RAG] Condition names detected:', conditionNames);
+  console.log('[RAG] Top score:', topScore.toFixed(1), 'Threshold:', relevanceThreshold.toFixed(1));
+  console.log('[RAG] Retrieved', relevant.length, 'relevant documents:', relevant.map(r => `${r.doc.title} (score: ${r.score.toFixed(1)})`));
+
+  // Step 6: Convert to RagEvidence format
   return relevant.map(item => {
     const excerpt = extractExcerpt(item.doc.text, 4);
     
