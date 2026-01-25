@@ -93,9 +93,9 @@ const Profile: React.FC = () => {
                     <p className="text-[#9a4c73] dark:text-white/60 text-base font-normal">Customize your experience to match your current life stage and medical needs.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full border border-green-100 dark:border-green-800">
-                        <span className="material-symbols-outlined text-green-600 dark:text-green-400 mr-2" style={{ fontSize: '16px' }}>verified_user</span>
-                        <span className="text-green-700 dark:text-green-300 text-[10px] font-bold uppercase tracking-wider">Local Storage</span>
+                    <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full h-fit">
+                        <span className="material-symbols-outlined text-primary text-[16px]">verified_user</span>
+                        <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Local Storage</span>
                     </div>
                     <button 
                         onClick={handleSaveChanges}
