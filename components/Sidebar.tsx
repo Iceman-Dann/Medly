@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
     { name: 'Dashboard', icon: 'home', path: '/' },
+    { name: 'Your Logs', icon: 'calendar_today', path: '/logs' },
     { name: 'Symptom Log', icon: 'add_notes', path: '/log-new' },
     { name: 'AI Assistant', icon: 'smart_toy', path: '/chat' },
     { name: 'Doctor\'s Prep', icon: 'medical_information', path: '/prep' },

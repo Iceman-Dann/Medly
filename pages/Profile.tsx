@@ -57,7 +57,7 @@ const Profile: React.FC = () => {
                 <div className="flex items-center gap-3">
                     <div className="flex items-center bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full border border-green-100 dark:border-green-800">
                         <span className="material-symbols-outlined text-green-600 dark:text-green-400 mr-2" style={{ fontSize: '16px' }}>verified_user</span>
-                        <span className="text-green-700 dark:text-green-300 text-[10px] font-bold uppercase tracking-wider">Data Encrypted</span>
+                        <span className="text-green-700 dark:text-green-300 text-[10px] font-bold uppercase tracking-wider">Local Storage</span>
                     </div>
                     <button 
                         onClick={handleSaveChanges}
@@ -241,10 +241,6 @@ const Profile: React.FC = () => {
 
             {/* Privacy & Trust Banner */}
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-12 gap-y-6 py-6 opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-                <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>lock</span>
-                    <span className="text-[10px] font-black tracking-widest uppercase">End-to-End Encrypted</span>
-                </div>
                 <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>shield</span>
                     <span className="text-[10px] font-black tracking-widest uppercase">Protocol Compliance</span>

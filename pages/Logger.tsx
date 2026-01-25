@@ -140,6 +140,13 @@ const Logger: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-4 md:p-8 lg:ml-64 animate-in fade-in duration-500">
+            <header className="mb-8 flex items-center justify-between">
+                <h2 className="text-3xl font-black tracking-tight">Log New Symptom</h2>
+                <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
+                    <span className="material-symbols-outlined text-primary text-[16px]">verified_user</span>
+                    <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Local Storage</span>
+                </div>
+            </header>
             <div className="w-full flex flex-col gap-8">
                 {/* Progress Card */}
                 <div className="flex flex-col gap-3 p-6 bg-white dark:bg-rose-950/20 rounded-2xl shadow-sm border border-pink-50 dark:border-pink-900/30">
@@ -277,10 +284,6 @@ const Logger: React.FC = () => {
                                 </div>
                                 <h2 className="text-xl font-black text-slate-800 dark:text-pink-50">4. Secure Image Upload</h2>
                             </div>
-                            <span className="flex items-center gap-1.5 text-[9px] font-black bg-primary/10 text-primary px-3 py-1.5 rounded-full uppercase tracking-widest border border-primary/20">
-                                <span className="material-symbols-outlined !text-[14px]">lock</span> 
-                                End-to-End Encrypted
-                            </span>
                         </div>
                         {visualEvidence ? (
                             <div className="border-2 border-primary/20 bg-white dark:bg-rose-950/10 rounded-2xl p-6 relative">

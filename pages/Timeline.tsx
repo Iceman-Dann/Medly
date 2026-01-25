@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useHealth } from '../HealthContext';
 import { SymptomLog } from '../types';
@@ -168,15 +167,14 @@ const LogEntry: React.FC<{ log: SymptomLog; index: number; total: number; isFirs
     );
 };
 
-const Dashboard: React.FC = () => {
+const Timeline: React.FC = () => {
     const { logs } = useHealth();
-    const displayedLogs = logs.slice(0, 5);
 
     return (
         <div className="max-w-6xl mx-auto p-4 lg:p-8 lg:ml-64">
             <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl font-black tracking-tight mb-2">Health Overview</h2>
+                    <h2 className="text-3xl font-black tracking-tight mb-2">Timeline History</h2>
                 </div>
                 <div className="flex items-center gap-3">
                     <Link 
@@ -189,73 +187,35 @@ const Dashboard: React.FC = () => {
                 </div>
             </header>
 
-            {/* Quick Navigation Cards */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                <Link to="/log-new" className="group bg-white dark:bg-rose-950/10 border border-slate-200 dark:border-rose-900/30 p-6 rounded-3xl hover:border-primary/50 transition-all">
-                    <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span className="material-symbols-outlined text-2xl">add_notes</span>
+            <div className="space-y-4 relative">
+                {logs.length > 0 && (
+                    <div className="absolute left-[18px] top-4 bottom-4 w-px bg-slate-200 dark:bg-rose-muted/20"></div>
+                )}
+                {logs.length === 0 ? (
+                    <div className="p-16 text-center bg-white dark:bg-surface-dark border-2 border-dashed border-slate-200 dark:border-rose-muted/40 rounded-2xl">
+                        <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-rose-muted/50 mb-3">history</span>
+                        <p className="text-slate-500 dark:text-rose-text font-medium">Your health timeline is empty.</p>
+                        <Link to="/log-new" className="text-primary text-sm font-bold mt-2 inline-block hover:underline">Create your first log</Link>
                     </div>
-                    <h4 className="font-bold text-lg mb-1">Track Symptom</h4>
-                    <p className="text-xs text-slate-500">Record a new health event in your local vault.</p>
-                </Link>
-                <Link to="/chat" className="group bg-white dark:bg-rose-950/10 border border-slate-200 dark:border-rose-900/30 p-6 rounded-3xl hover:border-primary/50 transition-all">
-                    <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span className="material-symbols-outlined text-2xl">smart_toy</span>
-                    </div>
-                    <h4 className="font-bold text-lg mb-1">AI Assistant</h4>
-                    <p className="text-xs text-slate-500">Analyze trends or prepare for a consultation.</p>
-                </Link>
-                <Link to="/prep" className="group bg-white dark:bg-rose-950/10 border border-slate-200 dark:border-rose-900/30 p-6 rounded-3xl hover:border-primary/50 transition-all">
-                    <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span className="material-symbols-outlined text-2xl">clinical_notes</span>
-                    </div>
-                    <h4 className="font-bold text-lg mb-1">Provider Report</h4>
-                    <p className="text-xs text-slate-500">Generate professional SOAP notes for your doctor.</p>
-                </Link>
-            </section>
-
-            <div className="grid grid-cols-12 gap-8">
-                <div className="col-span-12 lg:col-span-7">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold">Recent History</h3>
-                        <Link to="/logs" className="text-xs font-bold text-primary hover:underline">View All</Link>
-                    </div>
-                    <div className="space-y-4 relative">
-                        {displayedLogs.length > 0 && (
-                            <div className="absolute left-[18px] top-4 bottom-4 w-px bg-slate-200 dark:bg-rose-muted/20"></div>
-                        )}
-                        {logs.length === 0 ? (
-                            <div className="p-16 text-center bg-white dark:bg-surface-dark border-2 border-dashed border-slate-200 dark:border-rose-muted/40 rounded-2xl">
-                                <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-rose-muted/50 mb-3">history</span>
-                                <p className="text-slate-500 dark:text-rose-text font-medium">Your health timeline is empty.</p>
-                                <Link to="/log-new" className="text-primary text-sm font-bold mt-2 inline-block hover:underline">Create your first log</Link>
-                            </div>
-                        ) : displayedLogs.map((log, i) => (
-                            <LogEntry 
-                                key={log.id} 
-                                log={log} 
-                                index={i} 
-                                total={displayedLogs.length} 
-                                isFirst={i === 0}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                <div className="col-span-12 lg:col-span-5 space-y-8">
-                    <div className="bg-primary/5 border-l-4 border-primary p-4 rounded-r-xl">
-                        <div className="flex gap-3">
-                            <span className="material-symbols-outlined text-primary">lightbulb</span>
-                            <div>
-                                <p className="text-sm font-bold mb-1 text-slate-900 dark:text-slate-100">Privacy Tip</p>
-                                <p className="text-xs text-slate-600 dark:text-rose-text leading-relaxed">Your data never leaves this browser. Remember to export a backup to your personal cloud if you change devices.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                ) : logs.map((log, i) => (
+                    <LogEntry 
+                        key={log.id} 
+                        log={log} 
+                        index={i} 
+                        total={logs.length} 
+                        isFirst={i === 0}
+                    />
+                ))}
             </div>
+            {logs.length > 10 && (
+                <div className="mt-12 text-center">
+                    <button className="px-10 py-3 bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 rounded-xl text-xs font-bold text-slate-600 dark:text-rose-text hover:text-primary hover:border-primary transition-all tracking-widest uppercase">
+                        Load Historical Entries
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
 
-export default Dashboard;
+export default Timeline;

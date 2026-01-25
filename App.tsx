@@ -4,6 +4,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-ro
 import { HealthProvider } from './HealthContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
+import Timeline from './pages/Timeline';
 import ChatAssistant from './pages/ChatAssistant';
 import PrepHub from './pages/PrepHub';
 import Logger from './pages/Logger';
@@ -12,6 +13,7 @@ import QRHandshake from './pages/QRHandshake';
 
 const navItems = [
     { name: 'Dashboard', icon: 'grid_view', path: '/' },
+    { name: 'Your Logs', icon: 'calendar_today', path: '/logs' },
     { name: 'Symptom Log', icon: 'add_notes', path: '/log-new' },
     { name: 'AI Chat Bot', icon: 'smart_toy', path: '/chat' },
     { name: 'Clinical Report', icon: 'medical_information', path: '/prep' },
@@ -51,19 +53,10 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
                     ))}
                 </div>
 
-                <div className="flex items-center gap-0 sm:gap-3">
-                    <div className="hidden sm:flex flex-col items-end mr-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1 whitespace-nowrap">Status</p>
-                        <div className="flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="relative flex h-2 w-2 shrink-0">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            <span className="text-[10px] font-bold text-emerald-500 uppercase">Vault Secured</span>
-                        </div>
-                    </div>
-                    <Link to="/profile" className="transition-transform hover:scale-110 active:scale-95 p-1.5 sm:p-0 -mr-1 sm:mr-0">
+                <div className="flex items-center gap-3">
+                    <Link to="/profile" className="flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
                         <span className="mdi mdi-incognito-circle text-slate-500 dark:text-slate-400 text-2xl"></span>
+                        <span className="hidden sm:block text-sm font-bold text-slate-600 dark:text-slate-300">Anonymous User</span>
                     </Link>
                 </div>
             </div>
@@ -125,7 +118,7 @@ const AppContent: React.FC = () => {
             <main className="relative min-h-[calc(100vh-64px)] overflow-x-hidden">
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="/logs" element={<Dashboard />} />
+                    <Route path="/logs" element={<Timeline />} />
                     <Route path="/chat" element={<ChatAssistant />} />
                     <Route path="/prep" element={<PrepHub />} />
                     <Route path="/log-new" element={<Logger />} />

@@ -456,9 +456,15 @@ const PrepHub: React.FC = () => {
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-10 lg:p-12 lg:ml-64 animate-in fade-in duration-500">
-            <header className="mb-10 flex flex-col gap-2">
-                <h1 className="text-4xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">Provider Prep Hub</h1>
-                <p className="text-slate-500 dark:text-slate-400 text-lg font-normal max-w-2xl">Streamline your next clinical visit with data-driven reports and customized talking points.</p>
+            <header className="mb-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-4xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">Provider Prep Hub</h1>
+                    <p className="text-slate-500 dark:text-slate-400 text-lg font-normal max-w-2xl">Streamline your next clinical visit with data-driven reports and customized talking points.</p>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full h-fit">
+                    <span className="material-symbols-outlined text-primary text-[16px]">verified_user</span>
+                    <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Local Storage</span>
+                </div>
             </header>
 
             {/* New Report Settings */}
@@ -590,10 +596,6 @@ const PrepHub: React.FC = () => {
                                             {new Date(activeReport.timestamp).toLocaleDateString()} • {formatTimeRange(activeReport.timeRange)} Range
                                         </p>
                                     </div>
-                                </div>
-                                <div className="bg-white dark:bg-black/40 border border-primary/20 text-primary px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-sm">lock</span>
-                                    End-to-End Encrypted
                                 </div>
                             </div>
                             
