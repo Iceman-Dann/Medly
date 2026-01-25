@@ -23,6 +23,8 @@ const navItems = [
 ];
 
 const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
+    const location = useLocation();
+    
     return (
         <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-rose-900/20 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-4 lg:px-10 py-3">
             <div className="flex items-center justify-between max-w-[1400px] mx-auto">
@@ -44,15 +46,22 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
                 </div>
 
                 <div className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-rose-950/20 p-1 rounded-xl">
-                    {navItems.map((item) => (
-                        <Link 
-                            key={item.path}
-                            to={item.path}
-                            className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all hover:text-primary"
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
+                    {navItems.map((item) => {
+                        const isActive = location.pathname === item.path;
+                        return (
+                            <Link 
+                                key={item.path}
+                                to={item.path}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-white dark:bg-rose-900/30 text-primary shadow-sm'
+                                        : 'hover:text-primary'
+                                }`}
+                            >
+                                {item.name}
+                            </Link>
+                        );
+                    })}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -73,12 +82,12 @@ const MobileMenu = ({ isOpen, closeMenu }: { isOpen: boolean, closeMenu: () => v
     return (
         <div className="fixed inset-0 z-[60] lg:hidden">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={closeMenu}></div>
-            <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-background-dark shadow-2xl p-6 animate-in slide-in-from-left duration-300">
+            <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-background-dark shadow-2xl p-6 animate-in slide-in-from-left duration-300 flex flex-col">
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-xl font-black text-primary italic text-2xl">Symra</h2>
                     <button onClick={closeMenu} className="p-2 text-slate-400"><span className="material-symbols-outlined">close</span></button>
                 </div>
-                <nav className="flex flex-col gap-2">
+                <nav className="flex flex-col gap-2 flex-grow">
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         return (
@@ -98,6 +107,20 @@ const MobileMenu = ({ isOpen, closeMenu }: { isOpen: boolean, closeMenu: () => v
                         );
                     })}
                 </nav>
+                <div className="pt-6 border-t border-slate-200 dark:border-rose-900/20 mt-auto">
+                    <Link
+                        to="/settings"
+                        onClick={closeMenu}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                            location.pathname === '/settings'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                : 'text-slate-600 dark:text-slate-400 hover:bg-primary/5'
+                        }`}
+                    >
+                        <span className="material-symbols-outlined">settings</span>
+                        <span className="text-sm font-bold">Settings</span>
+                    </Link>
+                </div>
             </div>
         </div>
     );
