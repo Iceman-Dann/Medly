@@ -9,8 +9,8 @@ export default defineConfig(({ mode }) => {
     const base = repoName && process.env.GITHUB_REPOSITORY ? `/${repoName}/` : '/';
     
     // Get API key from env (works in both dev and build)
-    // Support GEMINI_API_KEY, API_KEY, and OPENAI_API_KEY for backwards compatibility
-    const apiKey = process.env.GEMINI_API_KEY || env.GEMINI_API_KEY || process.env.API_KEY || env.API_KEY || process.env.OPENAI_API_KEY || env.OPENAI_API_KEY || '';
+    // Support GEMINI_API_KEY and API_KEY for backwards compatibility
+    const apiKey = process.env.GEMINI_API_KEY || env.GEMINI_API_KEY || process.env.API_KEY || env.API_KEY || '';
     
     console.log('Building with API key:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT SET');
     
@@ -22,9 +22,8 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
+        'process.env.GEMINI_API_KEY': JSON.stringify(apiKey),
         'process.env.API_KEY': JSON.stringify(apiKey),
-        'process.env.OPENAI_API_KEY': JSON.stringify(apiKey),
-        'import.meta.env.VITE_OPENAI_API_KEY': JSON.stringify(apiKey),
       },
       resolve: {
         alias: {

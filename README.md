@@ -19,7 +19,7 @@ A secure, privacy-first medical symptom assistant that helps users track health 
 - **Frontend**: React 19, TypeScript, Vite
 - **Styling**: Tailwind CSS
 - **Database**: Dexie (IndexedDB wrapper)
-- **AI Services**: Google Gemini, OpenAI, Anthropic Claude, Groq
+- **AI Services**: Google Gemini
 - **Routing**: React Router
 - **PDF Generation**: jsPDF
 - **Validation**: Zod
@@ -27,7 +27,7 @@ A secure, privacy-first medical symptom assistant that helps users track health 
 ## Prerequisites
 
 - Node.js (v18 or higher recommended)
-- A Gemini API key (or other AI service API keys)
+- A Gemini API key
 
 ## Setup
 
@@ -44,7 +44,7 @@ A secure, privacy-first medical symptom assistant that helps users track health 
 
 3. Set up environment variables:
    - Copy `.env.example` to `.env.local`
-   - Add your `GEMINI_API_KEY` (or other AI service API keys)
+   - Add your `GEMINI_API_KEY`
 
 4. Run the development server:
    ```bash
@@ -66,7 +66,7 @@ The built files will be in the `dist` directory.
 - `/pages` - Main application pages (Dashboard, Logger, ChatAssistant, etc.)
 - `/components` - Reusable React components
 - `/lib` - Core libraries (chat, retrieval, patterns, sanitization)
-- `/services` - External service integrations (Gemini, OpenAI)
+- `/services` - External service integrations (Gemini)
 - `/db.ts` - Database schema and operations
 - `/public` - Static assets
 

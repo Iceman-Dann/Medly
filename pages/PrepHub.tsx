@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useHealth } from '../HealthContext';
 import { useFocusMode } from '../FocusModeContext';
-import { gemini } from '../services/openai';
+import { gemini } from '../services/gemini';
 import { ClinicalReport } from '../types';
 import jsPDF from 'jspdf';
 
@@ -257,10 +257,12 @@ const PrepHub: React.FC = () => {
                 : timeRange;
             
             const activeMeds = medications.filter(m => m.status === 'active');
-            const [note, list] = await Promise.all([
-                gemini.generateSOAPNote(filteredLogs, areasToUse, activeMeds),
-                gemini.generateChecklist(filteredLogs, areasToUse, activeMeds)
-            ]);
+            
+            const note = await gemini.generateSOAPNote(filteredLogs, areasToUse, activeMeds);
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const list = await gemini.generateChecklist(filteredLogs, areasToUse, activeMeds);
 
             await addReport({
                 timeRange: rangeToStore,

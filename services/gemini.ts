@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { SymptomLog, ChatMessage } from "../types";
+import { SymptomLog, ChatMessage, Medication } from "../types";
 
 const SYSTEM_PROMPT = `You are Symra, a confident and supportive women's health advocate assistant. 
 Your goal is to help users understand their symptom patterns and prepare for doctor visits.
@@ -9,6 +9,37 @@ NEVER provide a definitive medical diagnosis.
 You have access to the user's symptom logs stored locally - assume all data already exists and never ask users to re-enter symptom details.
 When users ask for reviews, comparisons, or analysis, provide insights immediately from existing logs.
 Keep responses concise and action-oriented.`;
+
+async function retryWithBackoff<T>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+): Promise<T> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            lastError = error;
+            
+            const isRetryable = error?.error?.code === 503 || 
+                               error?.error?.status === 'UNAVAILABLE' ||
+                               error?.message?.includes('overloaded') ||
+                               error?.message?.includes('503');
+            
+            if (!isRetryable || attempt === maxRetries) {
+                throw error;
+            }
+            
+            const delay = baseDelay * Math.pow(2, attempt);
+            console.log(`API request failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+    
+    throw lastError || new Error('Request failed after retries');
+}
 
 export class GeminiService {
     private ai: GoogleGenAI;
@@ -98,7 +129,7 @@ export class GeminiService {
         }
     }
 
-    async generateSOAPNote(logs: SymptomLog[], focusAreas: string[]) {
+    async generateSOAPNote(logs: SymptomLog[], focusAreas: string[], medications: Medication[] = []) {
         const logsData = logs.map(l => ({
             date: new Date(l.timestamp).toLocaleDateString(),
             symptom: l.name,
@@ -134,10 +165,14 @@ export class GeminiService {
         ).join('\n');
 
         const focusText = focusAreas.length > 0 ? `Focus specifically on these areas: ${focusAreas.join(', ')}.` : '';
+        const medText = medications.length > 0
+            ? `The user has listed these active medications (include in Subjective when relevant): ${medications.map(m => `${m.name}${m.dosage ? ` ${m.dosage}` : ''}${m.schedule ? ` (${m.schedule})` : ''}`).join('; ')}.`
+            : '';
 
-        const response = await this.ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: `Generate a clinical SOAP note with ONLY Subjective and Objective sections (NO Assessment or Plan) based on these logs: ${JSON.stringify(logsData)}. ${focusText} Focus on clinical advocacy.
+        const response = await retryWithBackoff(() => 
+            this.ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: `Generate a clinical SOAP note with ONLY Subjective and Objective sections (NO Assessment or Plan) based on these logs: ${JSON.stringify(logsData)}. ${focusText} ${medText} Focus on clinical advocacy.
 
 Include in the Objective section a pattern summary with:
 - Total number of logs: ${logs.length}
@@ -145,19 +180,20 @@ Include in the Objective section a pattern summary with:
 ${patternSummary}
 
 The Objective section should include both clinical observations AND this quantitative pattern data.`,
-            config: {
-                systemInstruction: SYSTEM_PROMPT,
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        subjective: { type: Type.STRING },
-                        objective: { type: Type.STRING },
-                    },
-                    required: ["subjective", "objective"]
+                config: {
+                    systemInstruction: SYSTEM_PROMPT,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            subjective: { type: Type.STRING },
+                            objective: { type: Type.STRING },
+                        },
+                        required: ["subjective", "objective"]
+                    }
                 }
-            }
-        });
+            })
+        );
 
         const parsed = JSON.parse(response.text || '{}');
         
@@ -169,7 +205,7 @@ The Objective section should include both clinical observations AND this quantit
         };
     }
 
-    async generateChecklist(logs: SymptomLog[], focusAreas: string[]) {
+    async generateChecklist(logs: SymptomLog[], focusAreas: string[], medications: Medication[] = []) {
         const logsData = logs.map(l => ({
             date: new Date(l.timestamp).toLocaleDateString(),
             symptom: l.name,
@@ -179,10 +215,14 @@ The Objective section should include both clinical observations AND this quantit
         }));
 
         const focusText = focusAreas.length > 0 ? `Focus specifically on these areas: ${focusAreas.join(', ')}.` : '';
+        const medText = medications.length > 0
+            ? `The user takes these medications: ${medications.map(m => `${m.name}${m.dosage ? ` ${m.dosage}` : ''}${m.schedule ? ` (${m.schedule})` : ''}`).join('; ')}. Consider medication-related questions (e.g. interactions, efficacy, timing) when relevant.`
+            : '';
 
-        const response = await this.ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: `Based on these symptom logs: ${JSON.stringify(logsData)}, generate 4-5 smart questions the user should ask their healthcare provider. ${focusText}
+        const response = await retryWithBackoff(() => 
+            this.ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: `Based on these symptom logs: ${JSON.stringify(logsData)}, generate 4-5 smart questions the user should ask their healthcare provider. ${focusText} ${medText}
 You are a Patient Advocate specialized in Women’s Health. Your goal is to analyze the provided symptom logs and generate 4-5 "Bridge Questions" that help the user speak confidently to their doctor.
 
 ### THE BRIDGE FORMULA
@@ -218,7 +258,8 @@ Return a list of objects:
                     }
                 }
             }
-        });
+            })
+        );
 
         return JSON.parse(response.text || '[]');
     }
