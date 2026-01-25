@@ -51,18 +51,18 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
                     ))}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-0 sm:gap-3">
                     <div className="hidden sm:flex flex-col items-end mr-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
-                        <div className="flex items-center gap-1.5">
-                            <span className="relative flex h-2 w-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1 whitespace-nowrap">Status</p>
+                        <div className="flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="relative flex h-2 w-2 shrink-0">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
                             <span className="text-[10px] font-bold text-emerald-500 uppercase">Vault Secured</span>
                         </div>
                     </div>
-                    <Link to="/profile" className="transition-transform hover:scale-110 active:scale-95">
+                    <Link to="/profile" className="transition-transform hover:scale-110 active:scale-95 p-1.5 sm:p-0 -mr-1 sm:mr-0">
                         <span className="mdi mdi-incognito-circle text-slate-500 dark:text-slate-400 text-2xl"></span>
                     </Link>
                 </div>
