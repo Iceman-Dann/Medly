@@ -79,3 +79,7 @@ Medly is designed with flexibility in mind. Users can choose between cloud stora
 ## License
 
 This project was created for Dev Season of Code 2025.
+
+## Contributors
+
+- Iceman-Dann (https://github.com/Iceman-Dann)
