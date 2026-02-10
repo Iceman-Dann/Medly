@@ -1,8 +1,10 @@
-# Symra - Medical Empowerment Assistant
+# Medly
 
-**RoseHack 2026**
+Medly is a privacy-first health tracking app that helps users monitor symptoms, identify patterns, and prepare for medical consultations. Features include local data storage, AI insights, professional SOAP notes, and secure sharing—all without compromising personal health data. Built with React, TypeScript, and offline-first architecture.
 
-A secure, privacy-first medical symptom assistant that helps users track health trends, generate clinical SOAP notes for doctor visits, and use AI to prepare for appointments. All data is stored locally in your browser.
+**Dev Season of Code 2026**
+
+A secure medical symptom assistant that helps users track health trends, generate clinical SOAP notes for doctor visits, and use AI to prepare for appointments. Choose between cloud storage (Google login) or local storage (anonymous mode).
 
 ## Features
 
@@ -11,7 +13,7 @@ A secure, privacy-first medical symptom assistant that helps users track health 
 - **SOAP Note Generation**: Automatically generate clinical SOAP notes for medical appointments
 - **Timeline View**: Visualize your health history and trends over time
 - **Doctor's Prep Hub**: Prepare questions and organize information before appointments
-- **Privacy-First**: All data stored locally in your browser using IndexedDB
+- **Flexible Storage**: Choose between cloud storage (Google login) or local storage (anonymous mode)
 - **QR Code Handshake**: Share medical reports securely via QR codes
 
 ## Tech Stack
@@ -34,7 +36,7 @@ A secure, privacy-first medical symptom assistant that helps users track health 
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd Symra
+   cd Medly
    ```
 
 2. Install dependencies:
@@ -72,8 +74,8 @@ The built files will be in the `dist` directory.
 
 ## Privacy & Security
 
-Symra is designed with privacy as a core principle. All user data is stored locally in the browser using IndexedDB. No health information is transmitted to external servers unless explicitly shared via QR code handshake.
+Medly is designed with flexibility in mind. Users can choose between cloud storage with Google login for data persistence across devices, or local storage (anonymous mode) for maximum privacy. No health information is transmitted to external servers unless explicitly shared via QR code handshake.
 
 ## License
 
-This project was created for RoseHack 2026.
+This project was created for Dev Season of Code 2025.

@@ -1,5 +1,5 @@
 {
-  "name": "symra---medical-empowerment-assistant",
+  "name": "medly",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,9 +13,10 @@
     "@anthropic-ai/sdk": "^0.71.2",
     "@google/genai": "^1.38.0",
     "dexie": "^4.2.1",
+    "firebase": "^12.8.0",
     "groq-sdk": "^0.37.0",
-    "openai": "^6.16.0",
     "jspdf": "^4.0.0",
+    "openai": "^6.16.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

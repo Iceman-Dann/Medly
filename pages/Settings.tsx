@@ -17,7 +17,7 @@ const Settings: React.FC = () => {
     const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {
-        const stored = localStorage.getItem('symra_last_export');
+        const stored = localStorage.getItem('medly_last_export');
         if (stored) {
             setLastExportDate(stored);
         }
@@ -43,7 +43,7 @@ const Settings: React.FC = () => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `symra-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `medly-backup-${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -51,7 +51,7 @@ const Settings: React.FC = () => {
             
             const exportDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             setLastExportDate(exportDate);
-            localStorage.setItem('symra_last_export', exportDate);
+            localStorage.setItem('medly_last_export', exportDate);
         } catch (error) {
             console.error('Export failed:', error);
         } finally {
@@ -233,7 +233,7 @@ const Settings: React.FC = () => {
                         </div>
                         <div className="max-w-2xl">
                             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-                                Permanently delete all your symptom logs, medications, reports, and profile data from your local storage. This action cannot be undone. Make sure you have exported a backup before proceeding.
+                                Permanently delete all your symptom logs, medications, reports, and profile data. This action cannot be undone. Make sure you have exported a backup before proceeding.
                             </p>
                             {deleteError && (
                                 <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl text-sm text-red-600 dark:text-red-400">
@@ -283,7 +283,7 @@ const Settings: React.FC = () => {
 
                     <div className="flex items-center justify-center gap-2 text-rose-text">
                         <span className="material-symbols-outlined text-sm">verified_user</span>
-                        <p className="text-[11px] font-bold uppercase tracking-widest">Symra never stores your raw data on public servers. All data is stored locally in your browser.</p>
+                        <p className="text-[11px] font-bold uppercase tracking-widest">Medly never stores your raw data on public servers. All data is stored locally in your browser.</p>
                     </div>
                 </div>
 
@@ -304,7 +304,7 @@ const Settings: React.FC = () => {
                                         {storageUsage.used.toFixed(1)} MB / {storageUsage.total.toFixed(1)} MB
                                     </span>
                                 </div>
-                                <p className="text-[11px] text-rose-text font-medium leading-relaxed uppercase tracking-wider">Local Storage Utilization</p>
+                                <p className="text-[11px] text-rose-text font-medium leading-relaxed uppercase tracking-wider">Storage Utilization</p>
                             </div>
                             <div>
                                 <h4 className="text-xs font-bold mb-4 flex items-center gap-2 uppercase tracking-widest">Last Activity</h4>

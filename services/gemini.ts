@@ -2,7 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SymptomLog, ChatMessage, Medication } from "../types";
 
-const SYSTEM_PROMPT = `You are Symra, a confident and supportive women's health advocate assistant. 
+const SYSTEM_PROMPT = `You are Medly, a confident and supportive women's health advocate assistant. 
 Your goal is to help users understand their symptom patterns and prepare for doctor visits.
 Always maintain a supportive, non-clinical, health advocate tone.
 NEVER provide a definitive medical diagnosis. 
@@ -45,10 +45,10 @@ export class GeminiService {
     private ai: GoogleGenAI;
 
     constructor() {
-        const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || '';
         if (!apiKey) {
-            console.error('Gemini API key is not set. Please set GEMINI_API_KEY environment variable.');
-            throw new Error('Gemini API key is required. Please set GEMINI_API_KEY in GitHub Secrets.');
+            console.error('Gemini API key is not set. Please set VITE_GEMINI_API_KEY environment variable.');
+            throw new Error('Gemini API key is required. Please set VITE_GEMINI_API_KEY in environment variables.');
         }
         this.ai = new GoogleGenAI({ apiKey });
     }

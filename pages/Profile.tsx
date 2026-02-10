@@ -95,7 +95,7 @@ const Profile: React.FC = () => {
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full h-fit">
                         <span className="material-symbols-outlined text-primary text-[16px]">verified_user</span>
-                        <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Local Storage</span>
+                        <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Storage</span>
                     </div>
                     <button 
                         onClick={handleSaveChanges}
@@ -272,7 +272,7 @@ const Profile: React.FC = () => {
                 <div className="bg-primary/5 p-5 flex items-start gap-4 border-t border-[#f3e7ed] dark:border-[#3d2431]">
                     <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>info</span>
                     <p className="text-xs text-[#9a4c73] dark:text-white/70 leading-relaxed">
-                        <span className="font-black text-primary uppercase tracking-widest text-[10px]">Pro Tip:</span> Setting up your medications here will enable smart notifications and drug interaction alerts within the Symra dashboard.
+                        <span className="font-black text-primary uppercase tracking-widest text-[10px]">Pro Tip:</span> Setting up your medications here will enable smart notifications and drug interaction alerts within the Medly dashboard.
                     </p>
                 </div>
             </section>

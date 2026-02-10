@@ -1,0 +1,15 @@
+Medly Git Log - Last 10 commits
+=================================
+
+b73ff2a (HEAD -> main, origin/main, origin/HEAD) Fix Gemini API Key stuff
+ca231db update color
+b785b08 More app touchups
+a070163 Edit README, favicon
+3d3a8dd Changed FocusModeContext and styling
+e6ca6f1 add delete data to settings
+8d12510 settings page, import export json
+01bd59f styling
+3dd395d Check for gemini key
+e8169fe Commit after npm install
+
+Generated on: 2026-02-02

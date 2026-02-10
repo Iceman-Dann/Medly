@@ -84,7 +84,7 @@ const ChatAssistant: React.FC = () => {
     const [patternCard, setPatternCard] = useState<PatternCard | null>(null);
     const [showEmergencyAlert, setShowEmergencyAlert] = useState(false);
     const [showFocusModeHint, setShowFocusModeHint] = useState(false);
-    const [threadId] = useState(() => crypto.randomUUID());
+    const [threadId] = useState(() => `thread-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Seed knowledge base and load pattern card on mount
@@ -162,7 +162,7 @@ const ChatAssistant: React.FC = () => {
 
         const redactedMessage = redactPII(userMessage);
 
-        const userMsgId = crypto.randomUUID();
+        const userMsgId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const newUserMessage: EnhancedMessage = {
             id: userMsgId,
             role: 'user',
@@ -180,7 +180,7 @@ const ChatAssistant: React.FC = () => {
             redactedContent: redactedMessage,
         });
 
-        const assistantMsgId = crypto.randomUUID();
+        const assistantMsgId = `assistant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         setMessages(prev => [...prev, {
             id: assistantMsgId,
             role: 'assistant',
@@ -725,9 +725,9 @@ Tell me which symptom and what details you'd like to add.`;
                     <div>
                         <h2 className="text-xl font-bold flex items-center gap-2">
                             <span className="material-symbols-outlined text-primary">smart_toy</span>
-                            Symra AI Assistant
+                            Medly AI Assistant
                         </h2>
-                        <p className="text-xs text-slate-500">Professional medical empowerment companion</p>
+                        <p className="text-xs text-slate-500">Professional medical companion</p>
                     </div>
                     <div className="flex items-center gap-4 p-3 rounded-xl border border-primary/10 bg-primary/5">
                         <div className="text-right hidden sm:block">
@@ -768,7 +768,7 @@ Tell me which symptom and what details you'd like to add.`;
                             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                                 <span className="material-symbols-outlined text-3xl text-primary">psychology</span>
                             </div>
-                            <h3 className="text-xl font-bold">Hello, I'm Symra</h3>
+                            <h3 className="text-xl font-bold">Hello, I'm Medly</h3>
                             <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
                                 How can I help you understand your symptoms today? I can analyze your logs, explain clinical terms, or help you prepare questions for your doctor.
                             </p>
@@ -837,7 +837,7 @@ Tell me which symptom and what details you'd like to add.`;
                             className="w-full bg-slate-50 dark:bg-rose-950/20 border border-slate-200 dark:border-rose-900/30 rounded-2xl py-4 pl-6 pr-16 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
                         />
                         <button 
-                            onClick={handleSend}
+                            onClick={() => handleSend()}
                             disabled={!input.trim() || isStreaming}
                             className="absolute right-3 bg-primary p-2.5 rounded-xl text-white hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/30 disabled:opacity-50 disabled:hover:scale-100"
                         >
@@ -845,7 +845,7 @@ Tell me which symptom and what details you'd like to add.`;
                         </button>
                     </div>
                     <p className="text-center text-[10px] text-slate-400 mt-3 uppercase tracking-widest">
-                        Symra AI is not a replacement for professional medical advice.
+                        Medly AI is not a replacement for professional medical advice.
                     </p>
                 </div>
             </footer>

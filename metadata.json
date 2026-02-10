@@ -1,7 +1,7 @@
 
 {
-  "name": "Symra - Medical Empowerment Assistant",
-  "description": "A secure, privacy-first medical symptom assistant that helps users track health trends, generate clinical SOAP notes for doctor visits, and use AI to prepare for appointments. All data is stored locally in your browser.",
+  "name": "Medly",
+  "description": "A secure medical symptom assistant that helps users track health trends, generate clinical SOAP notes for doctor visits, and use AI to prepare for appointments. Choose between cloud storage (Google login) or local storage (anonymous mode).",
   "requestFramePermissions": [
     "camera",
     "microphone"

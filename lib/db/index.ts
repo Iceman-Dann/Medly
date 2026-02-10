@@ -2,7 +2,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type { Log, Attachment, ChatMessage, Report, KBDocument } from '@/types';
 
 // IndexedDB schema with versioned migrations (all data stored locally in browser)
-class SymraDatabase extends Dexie {
+class MedlyDatabase extends Dexie {
   logs!: EntityTable<Log, 'id'>;
   attachments!: EntityTable<Attachment, 'id'>;
   chats!: EntityTable<ChatMessage, 'id'>;
@@ -10,7 +10,7 @@ class SymraDatabase extends Dexie {
   kb_docs!: EntityTable<KBDocument, 'id'>;
 
   constructor() {
-    super('SymraDB');
+    super('MedlyDB');
 
     // Version 1 - Initial schema
     this.version(1).stores({
@@ -31,12 +31,12 @@ class SymraDatabase extends Dexie {
   }
 }
 
-export const db = new SymraDatabase();
+export const db = new MedlyDatabase();
 
 // ============ LOG HELPERS ============
 
 export async function saveLog(log: Omit<Log, 'id' | 'createdAt'>): Promise<string> {
-  const id = crypto.randomUUID();
+  const id = `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   const newLog: Log = {
     ...log,
     id,
@@ -103,7 +103,7 @@ export async function saveAttachment(
   file: File | Blob,
   originalName?: string
 ): Promise<string> {
-  const id = crypto.randomUUID();
+  const id = `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   const arrayBuffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -135,7 +135,7 @@ export async function deleteAttachment(id: string): Promise<void> {
 export async function saveChatMessage(
   message: Omit<ChatMessage, 'id' | 'createdAt'>
 ): Promise<string> {
-  const id = crypto.randomUUID();
+  const id = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   const newMessage: ChatMessage = {
     ...message,
     id,
@@ -177,7 +177,7 @@ export async function deleteThread(threadId: string): Promise<void> {
 export async function saveReport(
   report: Omit<Report, 'id' | 'createdAt'>
 ): Promise<string> {
-  const id = crypto.randomUUID();
+  const id = `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   const newReport: Report = {
     ...report,
     id,

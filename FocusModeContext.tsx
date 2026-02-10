@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type FocusModeId = 'menstrual' | 'fertility' | 'post_partum' | 'perimenopause' | null;
 
-const FOCUS_MODE_STORAGE_KEY = 'symra_focus_mode';
+const FOCUS_MODE_STORAGE_KEY = 'medly_focus_mode';
 
 interface FocusModeContextType {
     focusMode: FocusModeId;

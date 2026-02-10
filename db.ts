@@ -1,5 +1,5 @@
 
-const DB_NAME = 'SymraLocalVault';
+const DB_NAME = 'MedlyLocalVault';
 const STORE_LOGS = 'SymptomLogs';
 const STORE_PROFILE = 'UserProfile';
 const STORE_MEDS = 'Medications';

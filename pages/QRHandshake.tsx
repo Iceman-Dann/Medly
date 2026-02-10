@@ -86,7 +86,7 @@ const QRHandshake: React.FC = () => {
         const filteredLogs = getFilteredLogs(report.timeRange);
         const patterns = calculatePatterns(filteredLogs);
 
-        let text = `SYMRA CLINICAL REPORT\n`;
+        let text = `MEDLY CLINICAL REPORT\n`;
         text += `Generated: ${new Date(report.timestamp).toLocaleDateString()}\n`;
         text += `Time Range: ${formatTimeRange(report.timeRange)}\n`;
         text += `Focus Areas: ${report.focusAreas.join(', ')}\n\n`;
@@ -217,7 +217,7 @@ const QRHandshake: React.FC = () => {
                             <path d="M13.8261 17.4264C16.7203 18.1174 20.2244 18.5217 24 18.5217C27.7756 18.5217 31.2797 18.1174 34.1739 17.4264C36.9144 16.7722 39.9967 15.2331 41.3563 14.1648L24.8486 40.6391C24.4571 41.267 23.5429 41.267 23.1514 40.6391L6.64374 14.1648C8.00331 15.2331 11.0856 16.7722 13.8261 17.4264Z" fill="currentColor"></path>
                         </svg>
                     </div>
-                    <h2 className="text-slate-900 text-xl font-bold leading-tight tracking-[-0.015em]">Symra</h2>
+                    <h2 className="text-slate-900 text-xl font-bold leading-tight tracking-[-0.015em]">Medly</h2>
                 </div>
                 <div className="flex flex-1 justify-end gap-8 items-center">
                     <nav className="flex items-center gap-9">
@@ -319,7 +319,7 @@ const QRHandshake: React.FC = () => {
             </main>
 
             <footer className="p-8 text-center text-slate-400 text-xs border-t border-rose-100/50 bg-white">
-                © 2024 Symra Medical Privacy Systems. Protected under HIPAA/GDPR Compliance.
+                © 2024 Medly Medical Privacy Systems. Protected under HIPAA/GDPR Compliance.
             </footer>
         </div>
     );

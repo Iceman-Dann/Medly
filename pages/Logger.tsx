@@ -106,7 +106,7 @@ const Logger: React.FC = () => {
                 triggers: finalTriggers,
                 visualEvidence: visualEvidence || undefined
             });
-            navigate('/');
+            navigate('/dashboard');
         } catch (error) {
             console.error("Failed to save log:", error);
         } finally {
@@ -144,7 +144,7 @@ const Logger: React.FC = () => {
                 <h2 className="text-3xl font-black tracking-tight">Log New Symptom</h2>
                 <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
                     <span className="material-symbols-outlined text-primary text-[16px]">verified_user</span>
-                    <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Local Storage</span>
+                    <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Storage</span>
                 </div>
             </header>
             <div className="w-full flex flex-col gap-8">
@@ -398,7 +398,7 @@ const Logger: React.FC = () => {
                         Sovereign Patient Records
                     </div>
                     <p className="text-[10px] text-slate-400 dark:text-pink-400/40 max-w-lg leading-relaxed px-4 font-medium uppercase tracking-wider">
-                        Symra uses zero-knowledge local encryption. Your identity is decoupled from your health data. Only you can authorize access to these records for clinical review.
+                        Medly uses zero-knowledge local encryption. Your identity is decoupled from your health data. Only you can authorize access to these records for clinical review.
                     </p>
                 </div>
             </div>

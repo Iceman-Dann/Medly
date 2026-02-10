@@ -1,0 +1,186 @@
+/* Fallback CSS for localhost development */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css');
+
+/* Base Tailwind-like styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  background-color: #fdfaf7;
+  color: #1e293b;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background-color: #1a1415;
+  color: #f8fafc;
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  vertical-align: middle;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fdfaf7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e2d1d3;
+  border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1a1415;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #5a4145;
+}
+
+/* Common utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #d97b8c;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #b05a69;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #d97b8c;
+  border: 2px solid #d97b8c;
+}
+
+.btn-secondary:hover {
+  background-color: #d97b8c;
+  color: white;
+}
+
+/* Timeline styles */
+.timeline-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.dark .timeline-card {
+  background: #2d1f21;
+  border-color: #5a4145;
+}
+
+.timeline-card:hover {
+  border-color: #d97b8c;
+}
+
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 1.25rem;
+  color: #64748b;
+}
+
+/* Error state */
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  flex-direction: column;
+  color: #ef4444;
+}
+
+/* Basic layout */
+section {
+  padding: 4rem 0;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+p {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* Dark mode colors */
+.dark {
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --background: #1a1415;
+  --surface: #2d1f21;
+  --border: #5a4145;
+}
+
+/* Light mode colors */
+:root {
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --background: #fdfaf7;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+}

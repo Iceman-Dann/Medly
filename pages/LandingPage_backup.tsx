@@ -1,297 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useHealth } from '../HealthContext';
-import { SymptomLog } from '../types';
 import { Link } from 'react-router-dom';
-
-// Enhanced LogEntry component with pattern interactions
-const EnhancedLogEntry: React.FC<{ 
-  log: SymptomLog; 
-  index: number; 
-  total: number; 
-  isFirst: boolean;
-  onPatternClick: (pattern: string) => void;
-}> = ({ log, index, total, isFirst, onPatternClick }) => {
-    const [showAllTags, setShowAllTags] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
-    const symptomTags = log.name.split(',').map(s => s.trim()).filter(s => s.length > 0);
-    const formattedDate = new Date(log.timestamp).toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    const intensityColor = log.intensity <= 3 
-        ? 'bg-slate-400' 
-        : log.intensity <= 6 
-        ? 'bg-primary/60' 
-        : 'bg-primary';
-    
-    const intensityTextColor = log.intensity <= 3 
-        ? 'text-slate-500' 
-        : 'text-primary';
-    
-    const getCyclePhaseColors = (phase: string | undefined) => {
-        if (!phase || phase === 'Do Not Disclose') {
-            return 'bg-slate-100 dark:bg-rose-muted/30 text-slate-500 dark:text-rose-text border-slate-200 dark:border-rose-muted/40';
-        }
-        const phaseLower = phase.toLowerCase();
-        switch (phaseLower) {
-            case 'menstrual':
-                return 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/40';
-            case 'follicular':
-                return 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/40';
-            case 'ovulation':
-                return 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800/40';
-            case 'luteal':
-                return 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40';
-            default:
-                return 'bg-primary/5 text-primary border-primary/20';
-        }
-    };
-    
-    const cyclePhaseBg = getCyclePhaseColors(log.cyclePhase);
-
-    return (
-        <div className={`enhanced-log-entry ${isFirst ? 'first-entry' : ''} ${isHovered ? 'hovered' : ''}`}
-             onMouseEnter={() => setIsHovered(true)}
-             onMouseLeave={() => setIsHovered(false)}>
-            <div className={`timeline-dot ${isFirst ? 'primary' : 'secondary'}`}></div>
-            <div className="log-content">
-                <div className="log-header">
-                    <div className="log-date">{formattedDate}</div>
-                    {log.cyclePhase && log.cyclePhase !== 'Do Not Disclose' && (
-                        <span className={`cycle-phase-badge ${cyclePhaseBg}`}>
-                            Phase: {log.cyclePhase}
-                        </span>
-                    )}
-                </div>
-                
-                <div className="symptom-tags">
-                    {(showAllTags ? symptomTags : symptomTags.slice(0, 3)).map((tag, idx) => (
-                        <button 
-                            key={idx} 
-                            className="symptom-tag"
-                            onClick={() => onPatternClick(tag)}
-                            title={`Click to explore ${tag} patterns`}
-                        >
-                            <div className="tag-dot"></div>
-                            <span>{tag}</span>
-                        </button>
-                    ))}
-                    {symptomTags.length > 3 && !showAllTags && (
-                        <button
-                            onClick={() => setShowAllTags(true)}
-                            className="show-more-btn"
-                        >
-                            +{symptomTags.length - 3} more
-                        </button>
-                    )}
-                    {symptomTags.length > 3 && showAllTags && (
-                        <button
-                            onClick={() => setShowAllTags(false)}
-                            className="show-less-btn"
-                        >
-                            Show less
-                        </button>
-                    )}
-                </div>
-                
-                <div className="log-details">
-                    <div className="intensity-bar">
-                        <div className="intensity-label">
-                            <span>Intensity</span>
-                            <span className={`intensity-value ${intensityTextColor}`}>
-                                {log.intensity}/10
-                            </span>
-                        </div>
-                        <div className="intensity-track">
-                            <div 
-                                className={`intensity-fill ${intensityColor}`}
-                                style={{ width: `${(log.intensity / 10) * 100}%` }}
-                            ></div>
-                        </div>
-                    </div>
-                    
-                    {log.triggers && log.triggers.length > 0 && (
-                        <div className="triggers">
-                            {log.triggers.map((trigger: string, idx: number) => (
-                                <span key={idx} className="trigger-tag">
-                                    {trigger}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                
-                {log.notes && (
-                    <div className="log-notes">
-                        <div className="notes-header">
-                            <span className="material-symbols-outlined">edit_note</span>
-                            <span>Notes</span>
-                        </div>
-                        <p>{log.notes}</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-// LogEntry component definition
-const LogEntry: React.FC<{ log: SymptomLog; index: number; total: number; isFirst: boolean }> = ({ log, index, total, isFirst }) => {
-    const [showAllTags, setShowAllTags] = useState(false);
-    const symptomTags = log.name.split(',').map(s => s.trim()).filter(s => s.length > 0);
-    const formattedDate = new Date(log.timestamp).toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    const intensityColor = log.intensity <= 3 
-        ? 'bg-slate-400' 
-        : log.intensity <= 6 
-        ? 'bg-primary/60' 
-        : 'bg-primary';
-    
-    const intensityTextColor = log.intensity <= 3 
-        ? 'text-slate-500' 
-        : 'text-primary';
-    
-    const getCyclePhaseColors = (phase: string | undefined) => {
-        if (!phase || phase === 'Do Not Disclose') {
-            return 'bg-slate-100 dark:bg-rose-muted/30 text-slate-500 dark:text-rose-text border-slate-200 dark:border-rose-muted/40';
-        }
-        const phaseLower = phase.toLowerCase();
-        switch (phaseLower) {
-            case 'menstrual':
-                return 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/40';
-            case 'follicular':
-                return 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/40';
-            case 'ovulation':
-                return 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800/40';
-            case 'luteal':
-                return 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40';
-            default:
-                return 'bg-primary/5 text-primary border-primary/20';
-        }
-    };
-    
-    const cyclePhaseBg = getCyclePhaseColors(log.cyclePhase);
-
-    return (
-        <div className="relative pl-12">
-            <div className={`absolute left-[15px] top-6 w-[7px] h-[7px] rounded-full ${
-                isFirst ? 'bg-primary ring-4 ring-background-light dark:ring-background-dark' : 'bg-slate-300 dark:bg-rose-muted/50 ring-4 ring-background-light dark:ring-background-dark'
-            } z-10`}></div>
-            <details className="group" open={isFirst}>
-                <summary className="cursor-pointer">
-                    <div className="timeline-card bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
-                        <div className="flex flex-col gap-5">
-                            <div className="flex justify-between items-center">
-                                <span className="text-xs font-bold text-slate-500 dark:text-rose-text uppercase tracking-widest">
-                                    {formattedDate}
-                                </span>
-                                {log.cyclePhase && log.cyclePhase !== 'Do Not Disclose' && (
-                                    <span className={`px-3 py-1 ${cyclePhaseBg} text-[10px] font-bold uppercase tracking-widest rounded-md border`}>
-                                        Phase: {log.cyclePhase}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center flex-wrap gap-2">
-                                {(showAllTags ? symptomTags : symptomTags.slice(0, 3)).map((tag, idx) => (
-                                    <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-rose-muted/20 rounded-lg border border-slate-100 dark:border-rose-muted/10">
-                                        <div className="w-[6px] h-[6px] rounded-full bg-primary"></div>
-                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{tag}</span>
-                                    </div>
-                                ))}
-                                {symptomTags.length > 3 && !showAllTags && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            setShowAllTags(true);
-                                        }}
-                                        className="text-[10px] font-bold text-rose-text hover:text-primary transition-colors cursor-pointer ml-2"
-                                    >
-                                        +{symptomTags.length - 3} ADDITIONAL
-                                    </button>
-                                )}
-                                {symptomTags.length > 3 && showAllTags && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            setShowAllTags(false);
-                                        }}
-                                        className="text-[10px] font-bold text-rose-text hover:text-primary transition-colors cursor-pointer ml-2"
-                                    >
-                                        SHOW LESS
-                                    </button>
-                                )}
-                            </div>
-                            <div className="flex items-center justify-between gap-12 pt-5 border-t border-slate-50 dark:border-rose-muted/10">
-                                <div className="flex-1 max-w-[240px]">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Symptom Intensity</span>
-                                        <span className={`text-[10px] font-bold ${intensityTextColor}`}>
-                                            Level {String(log.intensity).padStart(2, '0')} / 10
-                                        </span>
-                                    </div>
-                                    <div className="h-1.5 w-full bg-slate-100 dark:bg-rose-muted/30 rounded-full overflow-hidden">
-                                        <div 
-                                            className={`h-full ${intensityColor}`}
-                                            style={{ width: `${(log.intensity / 10) * 100}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                                {log.triggers && log.triggers.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                        {log.triggers.map((trigger: string, idx: number) => (
-                                            <span 
-                                                key={idx}
-                                                className="px-2 py-1 bg-slate-100 dark:bg-rose-muted/30 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded border border-slate-200 dark:border-rose-muted/40 uppercase"
-                                            >
-                                                {trigger}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </summary>
-                <div className="mt-2 p-8 bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 rounded-2xl">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">edit_note</span> 
-                        USER NOTES & OBSERVATIONS
-                    </h4>
-                    {log.notes ? (
-                        <div className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium space-y-4">
-                            {log.notes.split('\n').map((paragraph, idx) => (
-                                <p key={idx}>{paragraph}</p>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-slate-500 italic">No specific observations were recorded for this timestamp.</p>
-                    )}
-                </div>
-            </details>
-        </div>
-    );
-};
+import { useHealth } from '../HealthContext';
 
 const MedlyLanding = () => {
-  const healthContext = useHealth();
-  
-  // Guard against undefined context - BEFORE any other code
-  if (!healthContext) {
-    return <div>Loading...</div>;
-  }
-  
+  const { logs, addLog } = useHealth();
   const [expandedCapability, setExpandedCapability] = useState(null);
   const [isDark, setIsDark] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -299,20 +11,8 @@ const MedlyLanding = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showTimelinePoint, setShowTimelinePoint] = useState(false);
   const [currentFlowStep, setCurrentFlowStep] = useState(0);
-  const [showSymptomForm, setShowSymptomForm] = useState(false);
-  const [isAddingSymptom, setIsAddingSymptom] = useState(false);
-  const [lastAddedSymptom, setLastAddedSymptom] = useState(null);
-  const [symptomForm, setSymptomForm] = useState({
-    name: 'Headache, Eye Strain, Fatigue',
-    category: 'Headache' as any,
-    intensity: 6,
-    notes: 'Persistent frontal headache for 3 days. Worsens in mornings. Accompanied by fatigue and eye strain symptoms. Taking over-the-counter pain relievers with limited effectiveness.',
-    triggers: ['Stress', 'lack of sleep', 'screen time'],
-    cyclePhase: 'Do Not Disclose'
-  });
   const heroRef = useRef(null);
-  
-  const { logs, addLog } = healthContext;
+
   // Sample data for landing page demo - combine real logs with sample if empty
   const sampleLogs = [
     {
@@ -481,60 +181,23 @@ const MedlyLanding = () => {
   }, []);
 
   const handleAddSymptom = async () => {
-    console.log('handleAddSymptom called');
+    setShowTimelinePoint(true);
     
-    if (!symptomForm.name.trim()) {
-      alert('Please enter at least one symptom');
-      setIsAddingSymptom(false);
-      return;
-    }
-    
-    setIsAddingSymptom(true);
-    
+    // Add to real backend for persistence
     try {
-      const logData = {
-        name: symptomForm.name,
-        category: symptomForm.category,
-        intensity: symptomForm.intensity,
-        notes: symptomForm.notes,
-        triggers: symptomForm.triggers,
-        cyclePhase: symptomForm.cyclePhase
-      };
-      
-      console.log('Adding log:', logData);
-      
-      if (!addLog) {
-        throw new Error('addLog function is not available');
-      }
-      
-      await addLog(logData);
-      console.log('Log added successfully');
-      
-      setLastAddedSymptom(symptomForm.name);
-      
-      // Reset form to demo data
-      setSymptomForm({
-        name: 'Headache, Eye Strain, Fatigue',
+      await addLog({
+        name: 'Headache, Eye Strain',
         category: 'Headache' as any,
         intensity: 6,
-        notes: 'Persistent frontal headache for 3 days. Worsens in mornings. Accompanied by fatigue and eye strain symptoms. Taking over-the-counter pain relievers with limited effectiveness.',
-        triggers: ['Stress', 'lack of sleep', 'screen time'],
+        notes: 'New headache with eye strain symptoms. Started after extended screen time. Mild to moderate intensity, throbbing sensation behind eyes.',
+        triggers: ['Screen time', 'eye strain', 'dehydration'],
         cyclePhase: 'Do Not Disclose'
       });
-      setShowSymptomForm(false);
-      
-      // Celebration effect
-      setTimeout(() => {
-        setShowTimelinePoint(false);
-        setLastAddedSymptom(null);
-      }, 4000);
-      
     } catch (error) {
-      console.error('Failed to add symptom:', error);
-      alert(`Failed to save symptom: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
-    } finally {
-      setIsAddingSymptom(false);
+      console.error('Failed to add demo symptom:', error);
     }
+    
+    setTimeout(() => setShowTimelinePoint(false), 3000);
   };
 
   const toggleCapability = (id) => {
@@ -2216,905 +1879,6 @@ const MedlyLanding = () => {
             padding: 0 1.5rem;
           }
         }
-      /* Pattern Discovery Styles */
-        .pattern-header {
-          text-align: center;
-          margin-bottom: 4rem;
-        }
-        
-        .pattern-subtitle {
-          font-size: 1.25rem;
-          opacity: 0.8;
-          max-width: 600px;
-          margin: 1rem auto 0;
-          line-height: 1.6;
-        }
-        
-        .pattern-discovery-demo {
-          display: grid;
-          gap: 3rem;
-        }
-        
-        /* Pattern Visualization */
-        .pattern-visualization {
-          display: grid;
-          grid-template-columns: 2fr 1fr;
-          gap: 3rem;
-          align-items: start;
-        }
-        
-        .pattern-canvas {
-          position: relative;
-          height: 400px;
-          background: linear-gradient(135deg, 
-            rgba(252, 231, 233, 0.3) 0%, 
-            rgba(253, 250, 247, 0.1) 50%,
-            rgba(252, 231, 233, 0.3) 100%
-          );
-          border-radius: 20px;
-          border: 1px solid rgba(217, 123, 140, 0.2);
-          overflow: hidden;
-        }
-        
-        body.dark .pattern-canvas {
-          background: linear-gradient(135deg, 
-            rgba(90, 65, 69, 0.2) 0%, 
-            rgba(10, 7, 8, 0.3) 50%,
-            rgba(90, 65, 69, 0.2) 100%
-          );
-          border-color: rgba(217, 123, 140, 0.3);
-        }
-        
-        .pattern-nodes {
-          position: relative;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .pattern-node {
-          position: absolute;
-          cursor: pointer;
-          transition: transform 300ms var(--ease-spring);
-        }
-        
-        .pattern-node:hover {
-          transform: scale(1.1);
-        }
-        
-        .node-core {
-          width: 40px;
-          height: 40px;
-          background: var(--rose-500);
-          border-radius: 50%;
-          box-shadow: 0 4px 16px rgba(217, 123, 140, 0.4);
-          animation: pulseGlow 3s ease-in-out infinite;
-        }
-        
-        .node-pulse {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 60px;
-          height: 60px;
-          border: 2px solid var(--rose-500);
-          border-radius: 50%;
-          opacity: 0.3;
-          animation: flowPulse 2s ease-in-out infinite;
-        }
-        
-        .node-label {
-          position: absolute;
-          top: 50px;
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--text-900);
-          background: white;
-          padding: 4px 8px;
-          border-radius: 6px;
-          border: 1px solid var(--rose-200);
-          white-space: nowrap;
-        }
-        
-        body.dark .node-label {
-          background: var(--surface-dark);
-          color: var(--text-dark);
-          border-color: var(--rose-700);
-        }
-        
-        .pattern-connections {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-        }
-        
-        .connection-line {
-          animation: drawLine 2s ease-out forwards;
-        }
-        
-        .pattern-particles {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-        }
-        
-        .particle {
-          position: absolute;
-          width: 4px;
-          height: 4px;
-          background: var(--rose-400);
-          border-radius: 50%;
-          opacity: 0.6;
-          animation: floatFast 4s ease-in-out infinite;
-        }
-        
-        /* Pattern Insights Panel */
-        .pattern-insights {
-          background: white;
-          border-radius: 16px;
-          border: 1px solid var(--rose-200);
-          padding: 2rem;
-          height: fit-content;
-        }
-        
-        body.dark .pattern-insights {
-          background: var(--surface-dark);
-          border-color: var(--rose-700);
-        }
-        
-        .insights-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          margin-bottom: 1.5rem;
-          color: var(--text-900);
-        }
-        
-        body.dark .insights-title {
-          color: var(--text-dark);
-        }
-        
-        .insights-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-        
-        .insight-card {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 1rem;
-          background: var(--bg-warm);
-          border-radius: 12px;
-          border: 1px solid var(--rose-100);
-          transition: all 300ms var(--ease);
-        }
-        
-        body.dark .insight-card {
-          background: var(--surface-dark-elevated);
-          border-color: var(--rose-800);
-        }
-        
-        .insight-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 16px rgba(217, 123, 140, 0.2);
-        }
-        
-        .insight-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          background: var(--rose-500);
-          color: white;
-          border-radius: 10px;
-          flex-shrink: 0;
-        }
-        
-        .insight-content {
-          flex: 1;
-        }
-        
-        .insight-value {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: var(--rose-500);
-          line-height: 1;
-        }
-        
-        .insight-label {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--rose-gray);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin: 0.25rem 0;
-        }
-        
-        .insight-detail {
-          font-size: 0.875rem;
-          color: var(--text-900);
-          opacity: 0.8;
-        }
-        
-        body.dark .insight-detail {
-          color: var(--text-dark);
-        }
-        
-        /* Timeline Controls */
-        .timeline-controls {
-          background: white;
-          border-radius: 16px;
-          border: 1px solid var(--rose-200);
-          padding: 2rem;
-        }
-        
-        body.dark .timeline-controls {
-          background: var(--surface-dark);
-          border-color: var(--rose-700);
-        }
-        
-        .control-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-        }
-        
-        .control-header h3 {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: var(--text-900);
-        }
-        
-        body.dark .control-header h3 {
-          color: var(--text-dark);
-        }
-        
-        .view-toggle {
-          display: flex;
-          gap: 0.5rem;
-          background: var(--bg-warm);
-          padding: 0.25rem;
-          border-radius: 10px;
-        }
-        
-        body.dark .view-toggle {
-          background: var(--surface-dark-elevated);
-        }
-        
-        .view-btn {
-          padding: 0.5rem 1rem;
-          border: none;
-          background: transparent;
-          color: var(--rose-gray);
-          font-size: 0.875rem;
-          font-weight: 600;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 200ms var(--ease);
-        }
-        
-        .view-btn.active {
-          background: white;
-          color: var(--rose-500);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        body.dark .view-btn.active {
-          background: var(--surface-dark);
-          color: var(--rose-400);
-        }
-        
-        .timeline-actions {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-        
-        .pulse-animation {
-          animation: pulseGlow 2s ease-in-out infinite;
-        }
-        
-        .action-hint {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-          color: var(--rose-gray);
-        }
-        
-        /* Enhanced Timeline */
-        .enhanced-timeline {
-          margin-top: 2rem;
-        }
-        
-        .timeline-header {
-          margin-bottom: 2rem;
-        }
-        
-        .timeline-stats {
-          display: flex;
-          gap: 2rem;
-        }
-        
-        .stat-item {
-          text-align: center;
-        }
-        
-        .stat-number {
-          display: block;
-          font-size: 2rem;
-          font-weight: 800;
-          color: var(--rose-500);
-          line-height: 1;
-        }
-        
-        .stat-label {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--rose-gray);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin-top: 0.25rem;
-        }
-        
-        /* Timeline Display */
-        .timeline-display {
-          position: relative;
-        }
-        
-        .timeline-header-info {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-        }
-        
-        .timeline-filters {
-          display: flex;
-          gap: 0.5rem;
-        }
-        
-        .filter-btn {
-          padding: 0.5rem 1rem;
-          border: 1px solid var(--rose-200);
-          background: white;
-          color: var(--rose-gray);
-          font-size: 0.875rem;
-          font-weight: 600;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 200ms var(--ease);
-        }
-        
-        .filter-btn.active,
-        .filter-btn:hover {
-          background: var(--rose-500);
-          color: white;
-          border-color: var(--rose-500);
-        }
-        
-        body.dark .filter-btn {
-          background: var(--surface-dark);
-          border-color: var(--rose-700);
-          color: var(--text-dark);
-        }
-        
-        .timeline-entries {
-          position: relative;
-        }
-        
-        .timeline-line {
-          position: absolute;
-          left: 20px;
-          top: 0;
-          bottom: 0;
-          width: 2px;
-          background: var(--rose-200);
-        }
-        
-        body.dark .timeline-line {
-          background: var(--rose-700);
-        }
-        
-        .timeline-progress {
-          width: 100%;
-          background: var(--rose-500);
-          transition: height 500ms var(--ease);
-          position: relative;
-        }
-        
-        .timeline-progress::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 8px;
-          height: 8px;
-          background: var(--rose-500);
-          border-radius: 50%;
-          box-shadow: 0 0 0 4px white, 0 0 0 6px var(--rose-200);
-        }
-        
-        .empty-timeline {
-          text-align: center;
-          padding: 4rem 2rem;
-          background: white;
-          border-radius: 16px;
-          border: 2px dashed var(--rose-200);
-        }
-        
-        body.dark .empty-timeline {
-          background: var(--surface-dark);
-          border-color: var(--rose-700);
-        }
-        
-        .empty-icon {
-          font-size: 3rem;
-          color: var(--rose-400);
-          margin-bottom: 1rem;
-        }
-        
-        .empty-timeline h4 {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: var(--text-900);
-          margin-bottom: 0.5rem;
-        }
-        
-        body.dark .empty-timeline h4 {
-          color: var(--text-dark);
-        }
-        
-        .empty-timeline p {
-          color: var(--rose-gray);
-          margin-bottom: 2rem;
-        }
-        
-        /* Enhanced Log Entry */
-        .enhanced-log-entry {
-          position: relative;
-          padding-left: 3rem;
-          margin-bottom: 2rem;
-          transition: all 300ms var(--ease);
-        }
-        
-        .enhanced-log-entry.hovered {
-          transform: translateX(4px);
-        }
-        
-        .timeline-dot {
-          position: absolute;
-          left: 0;
-          top: 8px;
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 0 0 3px var(--rose-200);
-          z-index: 2;
-        }
-        
-        .timeline-dot.primary {
-          background: var(--rose-500);
-          box-shadow: 0 0 0 3px white, 0 0 0 6px var(--rose-500);
-        }
-        
-        .log-content {
-          background: white;
-          border: 1px solid var(--rose-200);
-          border-radius: 12px;
-          padding: 1.5rem;
-          transition: all 300ms var(--ease);
-        }
-        
-        .log-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-        }
-        
-        .log-date {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--rose-gray);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-        
-        .cycle-phase-badge {
-          padding: 0.25rem 0.75rem;
-          font-size: 0.75rem;
-          font-weight: 600;
-          border-radius: 20px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-        
-        .symptom-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin-bottom: 1rem;
-        }
-        
-        .symptom-tag {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem 0.75rem;
-          background: var(--rose-50);
-          border: 1px solid var(--rose-200);
-          border-radius: 8px;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--text-900);
-          cursor: pointer;
-          transition: all 200ms var(--ease);
-        }
-        
-        body.dark .symptom-tag {
-          background: var(--surface-dark-elevated);
-          border-color: var(--rose-700);
-          color: var(--text-dark);
-        }
-        
-        .symptom-tag:hover {
-          background: var(--rose-500);
-          color: white;
-          transform: translateY(-2px);
-        }
-        
-        .tag-dot {
-          width: 6px;
-          height: 6px;
-          background: var(--rose-500);
-          border-radius: 50%;
-        }
-        
-        .symptom-tag:hover .tag-dot {
-          background: white;
-        }
-        
-        .show-more-btn,
-        .show-less-btn {
-          padding: 0.5rem 0.75rem;
-          background: transparent;
-          border: 1px solid var(--rose-300);
-          border-radius: 8px;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--rose-500);
-          cursor: pointer;
-          transition: all 200ms var(--ease);
-        }
-        
-        .show-more-btn:hover,
-        .show-less-btn:hover {
-          background: var(--rose-500);
-          color: white;
-        }
-        
-        .log-details {
-          margin-bottom: 1rem;
-        }
-        
-        .intensity-bar {
-          margin-bottom: 1rem;
-        }
-        
-        .intensity-label {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.5rem;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--rose-gray);
-        }
-        
-        .intensity-value {
-          font-weight: 700;
-        }
-        
-        .intensity-track {
-          height: 6px;
-          background: var(--rose-100);
-          border-radius: 3px;
-          overflow: hidden;
-        }
-        
-        body.dark .intensity-track {
-          background: var(--rose-800);
-        }
-        
-        .intensity-fill {
-          height: 100%;
-          transition: width 500ms var(--ease);
-        }
-        
-        .triggers {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-        }
-        
-        .trigger-tag {
-          padding: 0.25rem 0.5rem;
-          background: var(--slate-100);
-          border: 1px solid var(--slate-200);
-          border-radius: 6px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--slate-600);
-          text-transform: uppercase;
-        }
-        
-        body.dark .trigger-tag {
-          background: var(--surface-dark-elevated);
-          border-color: var(--slate-600);
-          color: var(--slate-300);
-        }
-        
-        .log-notes {
-          padding-top: 1rem;
-          border-top: 1px solid var(--rose-100);
-        }
-        
-        body.dark .log-notes {
-          border-top-color: var(--rose-800);
-        }
-        
-        .notes-header {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-bottom: 0.5rem;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--rose-gray);
-        }
-        
-        .log-notes p {
-          font-size: 0.875rem;
-          line-height: 1.6;
-          color: var(--text-900);
-        }
-        
-        body.dark .log-notes p {
-          color: var(--text-dark);
-        }
-        
-        /* Pattern Analysis Panel */
-        .pattern-analysis-panel {
-          background: white;
-          border: 1px solid var(--rose-200);
-          border-radius: 16px;
-          padding: 2rem;
-          height: fit-content;
-        }
-        
-        body.dark .pattern-analysis-panel {
-          background: var(--surface-dark);
-          border-color: var(--rose-700);
-        }
-        
-        .panel-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-        }
-        
-        .panel-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: var(--text-900);
-        }
-        
-        body.dark .panel-title {
-          color: var(--text-dark);
-        }
-        
-        .panel-status {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-          color: var(--rose-gray);
-        }
-        
-        .status-indicator {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--slate-300);
-        }
-        
-        .status-indicator.active {
-          background: #10b981;
-          animation: pulseGlow 2s ease-in-out infinite;
-        }
-        
-        .pattern-findings {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          margin-bottom: 2rem;
-        }
-        
-        .finding-item {
-          display: flex;
-          gap: 1rem;
-        }
-        
-        .finding-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          background: var(--rose-50);
-          color: var(--rose-500);
-          border-radius: 10px;
-          flex-shrink: 0;
-        }
-        
-        body.dark .finding-icon {
-          background: var(--rose-900/20);
-        }
-        
-        .finding-content h4 {
-          font-size: 1rem;
-          font-weight: 700;
-          color: var(--text-900);
-          margin-bottom: 0.25rem;
-        }
-        
-        body.dark .finding-content h4 {
-          color: var(--text-dark);
-        }
-        
-        .finding-content p {
-          font-size: 0.875rem;
-          color: var(--rose-gray);
-          margin-bottom: 0.75rem;
-        }
-        
-        .finding-chart {
-          height: 4px;
-          background: var(--rose-100);
-          border-radius: 2px;
-          overflow: hidden;
-        }
-        
-        body.dark .finding-chart {
-          background: var(--rose-800);
-        }
-        
-        .chart-bar {
-          height: 100%;
-          background: var(--rose-500);
-          border-radius: 2px;
-          transition: width 500ms var(--ease);
-        }
-        
-        .finding-days {
-          display: flex;
-          gap: 0.5rem;
-        }
-        
-        .day-dot {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 28px;
-          height: 28px;
-          background: var(--rose-50);
-          border: 1px solid var(--rose-200);
-          border-radius: 6px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--rose-gray);
-        }
-        
-        body.dark .day-dot {
-          background: var(--rose-900/20);
-          border-color: var(--rose-700);
-          color: var(--rose-text);
-        }
-        
-        .day-dot.active {
-          background: var(--rose-500);
-          color: white;
-          border-color: var(--rose-500);
-        }
-        
-        .trend-indicator {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-          font-weight: 600;
-        }
-        
-        .trend-indicator.positive {
-          color: #10b981;
-        }
-        
-        .panel-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        
-        .full-width {
-          width: 100%;
-          justify-content: center;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-          .pattern-visualization {
-            grid-template-columns: 1fr;
-          }
-          
-          .pattern-canvas {
-            height: 300px;
-          }
-          
-          .timeline-stats {
-            justify-content: space-around;
-          }
-        }
-        
-        @media (max-width: 768px) {
-          .pattern-header {
-            margin-bottom: 2rem;
-          }
-          
-          .pattern-discovery-demo {
-            gap: 2rem;
-          }
-          
-          .control-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-          }
-          
-          .timeline-actions {
-            flex-direction: column;
-            align-items: stretch;
-          }
-          
-          .timeline-header-info {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-          }
-          
-          .enhanced-log-entry {
-            padding-left: 2rem;
-          }
-          
-          .finding-item {
-            flex-direction: column;
-            gap: 0.75rem;
-          }
-        }
       `}</style>
 
       {/* SVG Definitions */}
@@ -3177,15 +1941,15 @@ const MedlyLanding = () => {
           <div className="header-content">
             <div className="logo">Medly</div>
             <nav role="navigation" aria-label="Main navigation">
-              <a href="#overview" onClick={(e) => { e.preventDefault(); document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' }); }}>Overview</a>
-              <a href="#capabilities" onClick={(e) => { e.preventDefault(); document.getElementById('capabilities')?.scrollIntoView({ behavior: 'smooth' }); }}>Capabilities</a>
-              <a href="#privacy" onClick={(e) => { e.preventDefault(); document.getElementById('privacy')?.scrollIntoView({ behavior: 'smooth' }); }}>Privacy</a>
-              <a href="#clinical" onClick={(e) => { e.preventDefault(); document.getElementById('clinical')?.scrollIntoView({ behavior: 'smooth' }); }}>Clinical Output</a>
-              <a href="#tech" onClick={(e) => { e.preventDefault(); document.getElementById('tech')?.scrollIntoView({ behavior: 'smooth' }); }}>Tech</a>
+              <a href="#overview">Overview</a>
+              <a href="#capabilities">Capabilities</a>
+              <a href="#privacy">Privacy</a>
+              <a href="#clinical">Clinical Output</a>
+              <a href="#tech">Tech</a>
             </nav>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <Link to="/auth" className="btn btn-secondary">Sign In</Link>
-              <Link to="/" className="btn btn-primary">View Demo</Link>
+              <Link to="/dashboard" className="btn btn-primary">View Demo</Link>
             </div>
           </div>
         </div>
@@ -3383,7 +2147,7 @@ const MedlyLanding = () => {
                       <p className="text-slate-500 dark:text-rose-text font-medium mb-3">No logs yet. Start tracking your health!</p>
                       <button 
                         className="btn btn-primary" 
-                        onClick={() => setShowSymptomForm(true)}
+                        onClick={handleAddSymptom}
                       >
                         + Create Your First Log
                       </button>
@@ -3498,163 +2262,97 @@ const MedlyLanding = () => {
         </div>
       </section>
 
-      {/* Pattern Discovery */}
+      {/* Interactive Timeline Demo */}
       <section className="scroll-animate">
         <div className="container">
           <h2 className="section-title">See patterns emerge over time</h2>
-          <p className="section-subtitle">Track your health journey with simple, beautiful visualizations</p>
-          
-          {/* Quick Navigation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div className="group bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 p-6 rounded-3xl hover:border-primary/50 transition-all">
-              <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-2xl">add_notes</span>
-              </div>
-              <h4 className="font-bold text-lg mb-1">Track Symptom</h4>
-              <p className="text-sm text-slate-500 dark:text-rose-text">Record a new health event in your local vault.</p>
+          <div className="timeline-demo">
+            <div className="demo-actions">
+              <button className="btn btn-primary" onClick={handleAddSymptom}>
+                + Add Symptom
+              </button>
+              <p className="demo-hint">Click to see timeline update with real data</p>
             </div>
-            <div className="group bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 p-6 rounded-3xl hover:border-primary/50 transition-all">
-              <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-2xl">smart_toy</span>
+            <div className="interactive-timeline">
+              <div className="timeline-header">
+                <h4>Your Health Timeline ({displayLogs.length} events)</h4>
+                <div className="timeline-stats">
+                  <span>Avg Intensity: {displayLogs.length > 0 ? Math.round(displayLogs.reduce((acc, log) => acc + log.intensity, 0) / displayLogs.length) : 0}/10</span>
+                </div>
               </div>
-              <h4 className="font-bold text-lg mb-1">AI Assistant</h4>
-              <p className="text-sm text-slate-500 dark:text-rose-text">Analyze trends or prepare for a consultation.</p>
-            </div>
-            <div className="group bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 p-6 rounded-3xl hover:border-primary/50 transition-all">
-              <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-2xl">clinical_notes</span>
-              </div>
-              <h4 className="font-bold text-lg mb-1">Provider Report</h4>
-              <p className="text-sm text-slate-500 dark:text-rose-text">Generate professional SOAP notes for your doctor.</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-12 gap-8">
-            <div className="col-span-12 lg:col-span-7">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold">Recent History</h3>
-                <button 
-                  className="text-xs font-bold text-primary hover:underline"
-                  onClick={() => setShowSymptomForm(true)}
-                >
-                  Add New
-                </button>
-              </div>
-              <div className="space-y-4 relative">
-                {displayLogs.length > 0 && (
-                  <div className="absolute left-[18px] top-4 bottom-4 w-px bg-slate-200 dark:bg-rose-muted/20"></div>
-                )}
-                {displayLogs.length === 0 ? (
-                  <div className="p-16 text-center bg-white dark:bg-surface-dark border-2 border-dashed border-slate-200 dark:border-rose-muted/40 rounded-2xl">
-                    <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-rose-muted/50 mb-3">history</span>
-                    <p className="text-slate-500 dark:text-rose-text font-medium">Your health timeline is empty.</p>
-                    <button 
-                      className="text-primary text-sm font-bold mt-2 inline-block hover:underline"
-                      onClick={() => setShowSymptomForm(true)}
-                    >
-                      Create your first log
+              <div className="timeline-events">
+                {displayLogs.length > 0 ? (
+                  (() => {
+                    // Calculate timeline bounds once
+                    const oldestTime = Math.min(...displayLogs.map(l => l.timestamp));
+                    const newestTime = Math.max(...displayLogs.map(l => l.timestamp));
+                    const timeRange = newestTime - oldestTime || 1;
+                    
+                    return displayLogs.slice().reverse().slice(0, 6).map((log, index) => {
+                      const timePosition = ((log.timestamp - oldestTime) / timeRange) * 80 + 10;
+                      
+                      return (
+                        <div key={log.id} className="timeline-event" style={{ 
+                          left: `${timePosition}%`,
+                          top: `${50 - (log.intensity / 10) * 40}%`
+                        }}>
+                          <div className="event-dot" style={{ 
+                            backgroundColor: log.intensity <= 3 ? '#10b981' : log.intensity <= 6 ? '#f59e0b' : '#ef4444',
+                            width: `${12 + log.intensity * 0.8}px`,
+                            height: `${12 + log.intensity * 0.8}px`
+                          }}></div>
+                          <div className="event-label">
+                            <div className="event-name">{log.name.split(',')[0].trim()}</div>
+                            <div className="event-intensity">Level {log.intensity}</div>
+                            <div className="event-time">{new Date(log.timestamp).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()
+                ) : (
+                  <div className="empty-timeline">
+                    <div className="empty-icon">📊</div>
+                    <p>No health events yet. Add your first symptom to see patterns!</p>
+                    <button className="btn btn-primary" onClick={handleAddSymptom} style={{ marginTop: '1rem' }}>
+                      + Add First Symptom
                     </button>
                   </div>
-                ) : displayLogs.slice(0, 3).map((log, i) => {
-                  const symptomTags = log.name.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                  const formattedDate = new Date(log.timestamp).toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      day: 'numeric', 
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                  });
-                  
-                  const intensityColor = log.intensity <= 3 
-                      ? 'bg-slate-400' 
-                      : log.intensity <= 6 
-                      ? 'bg-primary/60' 
-                      : 'bg-primary';
-                  
-                  const intensityTextColor = log.intensity <= 3 
-                      ? 'text-slate-500' 
-                      : 'text-primary';
-                  
-                  return (
-                    <div key={log.id} className="relative pl-12">
-                      <div className={`absolute left-[15px] top-6 w-[7px] h-[7px] rounded-full ${
-                        i === 0 ? 'bg-primary ring-4 ring-white dark:ring-surface-dark' : 'bg-slate-300 dark:bg-rose-muted/50 ring-4 ring-white dark:ring-surface-dark'
-                      } z-10`}></div>
-                      <div className="timeline-card bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
-                        <div className="flex flex-col gap-5">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-slate-500 dark:text-rose-text uppercase tracking-widest">
-                              {formattedDate}
-                            </span>
-                            <div className="flex items-center gap-2 px-2 py-1 bg-slate-50 dark:bg-rose-muted/20 rounded-lg">
-                              <div className="w-[6px] h-[6px] rounded-full bg-primary"></div>
-                              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Level {log.intensity}/10</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center flex-wrap gap-2">
-                            {symptomTags.slice(0, 3).map((tag, idx) => (
-                              <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-rose-muted/20 rounded-lg border border-slate-100 dark:border-rose-muted/10">
-                                <div className="w-[6px] h-[6px] rounded-full bg-primary"></div>
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{tag}</span>
-                              </div>
-                            ))}
-                            {symptomTags.length > 3 && (
-                              <span className="text-xs text-slate-500 dark:text-rose-text">
-                                +{symptomTags.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                          {log.notes && (
-                            <div className="text-sm text-slate-600 dark:text-rose-text">
-                              {log.notes.substring(0, 100)}{log.notes.length > 100 ? '...' : ''}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                {displayLogs.length > 3 && (
-                  <div className="text-center text-xs text-slate-500 dark:text-rose-text">
-                    +{displayLogs.length - 3} more logs
-                  </div>
                 )}
               </div>
-            </div>
-
-            <div className="col-span-12 lg:col-span-5 space-y-8">
-              <div className="bg-primary/5 border-l-4 border-primary p-4 rounded-r-xl">
-                <div className="flex gap-3">
-                  <span className="material-symbols-outlined text-primary">lightbulb</span>
-                  <div>
-                    <p className="text-sm font-bold mb-1 text-slate-900 dark:text-slate-100">Privacy Tip</p>
-                    <p className="text-xs text-slate-600 dark:text-rose-text leading-relaxed">Your data never leaves this browser. Remember to export a backup to your personal cloud if you change devices.</p>
-                  </div>
+              <div className="timeline-legend">
+                <div className="legend-item">
+                  <div className="legend-dot low"></div>
+                  <span>Low (1-3)</span>
+                </div>
+                <div className="legend-item">
+                  <div className="legend-dot medium"></div>
+                  <span>Medium (4-6)</span>
+                </div>
+                <div className="legend-item">
+                  <div className="legend-dot high"></div>
+                  <span>High (7-10)</span>
                 </div>
               </div>
-              
-              <div className="bg-white dark:bg-surface-dark border border-slate-200 dark:border-rose-muted/40 p-6 rounded-2xl">
-                <h3 className="text-lg font-bold mb-4">Quick Stats</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600 dark:text-rose-text">Total Logs</span>
-                    <span className="text-lg font-bold text-primary">{displayLogs.length}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600 dark:text-rose-text">Days Tracked</span>
-                    <span className="text-lg font-bold text-primary">{displayLogs.length > 0 ? '7' : '0'}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600 dark:text-rose-text">Avg Intensity</span>
-                    <span className="text-lg font-bold text-primary">
-                      {displayLogs.length > 0 
-                        ? Math.round(displayLogs.reduce((sum, log) => sum + log.intensity, 0) / displayLogs.length)
-                        : '0'
-                      }
-                    </span>
+              {displayLogs.length > 0 && (
+                <div className="timeline-insights">
+                  <h5>Quick Insights</h5>
+                  <div className="insights-grid">
+                    <div className="insight-item">
+                      <span className="insight-label">Most Recent:</span>
+                      <span className="insight-value">{displayLogs[displayLogs.length - 1]?.name.split(',')[0] || 'None'}</span>
+                    </div>
+                    <div className="insight-item">
+                      <span className="insight-label">Highest Intensity:</span>
+                      <span className="insight-value">Level {Math.max(...displayLogs.map(l => l.intensity))}/10</span>
+                    </div>
+                    <div className="insight-item">
+                      <span className="insight-label">Total Events:</span>
+                      <span className="insight-value">{displayLogs.length}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -3784,163 +2482,10 @@ const MedlyLanding = () => {
       {/* Footer */}
       <footer>
         <div className="container">
-          <p>Built for Dev Season of Code</p>
+          <p>Built for Dev Season of Code 2026</p>
           <p style={{ marginTop: '0.75rem' }}>Privacy-first by design</p>
         </div>
       </footer>
-
-      {/* Symptom Form Modal */}
-      {showSymptomForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-200 dark:border-rose-muted/40">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Add Symptom Log</h3>
-                <button
-                  onClick={() => setShowSymptomForm(false)}
-                  className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              {/* Symptom Name */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Symptom Name(s) *
-                </label>
-                <input
-                  type="text"
-                  value={symptomForm.name}
-                  onChange={(e) => setSymptomForm({...symptomForm, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-rose-muted/40 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:bg-surface-dark dark:text-slate-100"
-                  placeholder="e.g., Headache, Nausea, Fatigue"
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Category
-                </label>
-                <select
-                  value={symptomForm.category}
-                  onChange={(e) => setSymptomForm({...symptomForm, category: e.target.value as any})}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-rose-muted/40 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:bg-surface-dark dark:text-slate-100"
-                >
-                  <option value="Pain">Pain</option>
-                  <option value="Headache">Headache</option>
-                  <option value="Nausea">Nausea</option>
-                  <option value="Fatigue">Fatigue</option>
-                  <option value="Mood changes">Mood changes</option>
-                  <option value="Bloating">Bloating</option>
-                  <option value="Back pain">Back pain</option>
-                  <option value="Joint pain">Joint pain</option>
-                  <option value="Sleep issues">Sleep issues</option>
-                  <option value="Digestive issues">Digestive issues</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              {/* Intensity */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Intensity: {symptomForm.intensity}/10
-                </label>
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={symptomForm.intensity}
-                  onChange={(e) => setSymptomForm({...symptomForm, intensity: parseInt(e.target.value)})}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  <span>Mild</span>
-                  <span>Moderate</span>
-                  <span>Severe</span>
-                </div>
-              </div>
-
-              {/* Cycle Phase */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Cycle Phase
-                </label>
-                <select
-                  value={symptomForm.cyclePhase}
-                  onChange={(e) => setSymptomForm({...symptomForm, cyclePhase: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-rose-muted/40 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:bg-surface-dark dark:text-slate-100"
-                >
-                  <option value="Menstrual">Menstrual</option>
-                  <option value="Follicular">Follicular</option>
-                  <option value="Ovulation">Ovulation</option>
-                  <option value="Luteal">Luteal</option>
-                  <option value="Do Not Disclose">Do Not Disclose</option>
-                </select>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Notes
-                </label>
-                <textarea
-                  value={symptomForm.notes}
-                  onChange={(e) => setSymptomForm({...symptomForm, notes: e.target.value})}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-rose-muted/40 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:bg-surface-dark dark:text-slate-100 resize-none"
-                  placeholder="Additional details about your symptoms..."
-                />
-              </div>
-
-              {/* Triggers */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Possible Triggers
-                </label>
-                <input
-                  type="text"
-                  value={symptomForm.triggers.join(', ')}
-                  onChange={(e) => setSymptomForm({...symptomForm, triggers: e.target.value.split(',').map(t => t.trim()).filter(t => t)})}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-rose-muted/40 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:bg-surface-dark dark:text-slate-100"
-                  placeholder="e.g., Stress, lack of sleep, certain foods (comma separated)"
-                />
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-slate-200 dark:border-rose-muted/40 flex justify-end gap-3">
-              <button
-                onClick={() => setShowSymptomForm(false)}
-                className="px-4 py-2 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-surface-dark hover:bg-slate-200 dark:hover:bg-rose-muted/20 rounded-lg font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddSymptom}
-                disabled={isAddingSymptom || !symptomForm.name.trim()}
-                className="px-6 py-2 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center gap-2"
-              >
-                {isAddingSymptom ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Adding...
-                  </>
-                ) : (
-                  'Add Symptom'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Theme Toggle */}
       <button

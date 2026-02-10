@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHealth } from '../HealthContext';
 import { SymptomLog } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { getCurrentUser } from '../lib/firebase';
 
 const LogEntry: React.FC<{ log: SymptomLog; index: number; total: number; isFirst: boolean }> = ({ log, index, total, isFirst }) => {
     const [showAllTags, setShowAllTags] = useState(false);
@@ -170,7 +171,18 @@ const LogEntry: React.FC<{ log: SymptomLog; index: number; total: number; isFirs
 
 const Dashboard: React.FC = () => {
     const { logs } = useHealth();
+    const navigate = useNavigate();
     const displayedLogs = logs.slice(0, 5);
+    
+    // Check authentication
+    useEffect(() => {
+        const user = getCurrentUser();
+        const anonymousUser = localStorage.getItem('anonymous_user');
+        
+        if (!user && !anonymousUser) {
+            navigate('/auth');
+        }
+    }, [navigate]);
 
     return (
         <div className="max-w-6xl mx-auto p-4 lg:p-8 lg:ml-64">

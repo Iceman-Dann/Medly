@@ -430,7 +430,7 @@ const PrepHub: React.FC = () => {
         };
 
         doc.setTextColor(238, 43, 140);
-        addText('SYMRA CLINICAL REPORT', 18, true, [238, 43, 140]);
+        addText('MEDLY CLINICAL REPORT', 18, true, [238, 43, 140]);
         yPos += 5;
 
         doc.setTextColor(0, 0, 0);
@@ -473,7 +473,7 @@ const PrepHub: React.FC = () => {
             });
         }
 
-        const fileName = `Symra-Report-${new Date(activeReport.timestamp).toISOString().split('T')[0]}.pdf`;
+        const fileName = `Medly-Report-${new Date(activeReport.timestamp).toISOString().split('T')[0]}.pdf`;
         doc.save(fileName);
     };
 
@@ -494,7 +494,7 @@ const PrepHub: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full h-fit">
                     <span className="material-symbols-outlined text-primary text-[16px]">verified_user</span>
-                    <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Local Storage</span>
+                    <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Storage</span>
                 </div>
             </header>
 

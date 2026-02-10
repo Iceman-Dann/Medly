@@ -1,0 +1,1 @@
+Medly is a privacy-first health tracking app that helps users monitor symptoms, identify patterns, and prepare for medical consultations. Features include local data storage, AI insights, professional SOAP notes, and secure sharing—all without compromising personal health data. Built with React, TypeScript, and offline-first architecture.

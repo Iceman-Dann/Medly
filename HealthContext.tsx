@@ -58,7 +58,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const addLog = async (logData: Omit<SymptomLog, 'id' | 'timestamp'>) => {
         const newLog: SymptomLog = {
             ...logData,
-            id: crypto.randomUUID(),
+            id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             timestamp: Date.now(),
         };
         await saveLogToDB(newLog);
@@ -78,7 +78,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const addMedication = async (medData: Omit<Medication, 'id'>) => {
         const newMed: Medication = {
             ...medData,
-            id: crypto.randomUUID(),
+            id: `med-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         };
         await saveMedToDB(newMed);
         setMedications(prev => [...prev, newMed]);
@@ -103,7 +103,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const addReport = async (reportData: Omit<ClinicalReport, 'id' | 'timestamp'>) => {
         const newReport: ClinicalReport = {
             ...reportData,
-            id: crypto.randomUUID(),
+            id: `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             timestamp: Date.now(),
         };
         await saveReportToDB(newReport);
@@ -118,7 +118,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const addChatMessage = (msg: Omit<ChatMessage, 'id' | 'timestamp'>) => {
         const newMessage: ChatMessage = {
             ...msg,
-            id: crypto.randomUUID(),
+            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             timestamp: Date.now(),
         };
         setChatHistory(prev => [...prev, newMessage]);

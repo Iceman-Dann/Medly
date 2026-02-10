@@ -4,13 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Symra | Medical Empowerment Assistant</title>
+    <title>Medly</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="/styles.css" id="fallback-css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
     <script>
+        // Check if Tailwind loaded, if not use fallback
+        setTimeout(() => {
+            if (!window.tailwind) {
+                console.log('Tailwind CSS failed to load, using fallback styles');
+                document.getElementById('fallback-css').removeAttribute('disabled');
+            } else {
+                // Disable fallback if Tailwind loaded
+                document.getElementById('fallback-css').setAttribute('disabled', 'true');
+            }
+        }, 2000);
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -82,7 +93,7 @@
         }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100" style="margin: 0; padding: 0; font-family: 'Inter', sans-serif; background-color: #fdfaf7; color: #1e293b; min-height: 100vh;">
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
 </body>
