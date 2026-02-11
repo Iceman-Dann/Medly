@@ -671,7 +671,7 @@ const AuthPage = () => {
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3 px-4 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all duration-300 disabled:opacity-50 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
               >
-                <span className="text-xl animate-pulse">🕵️‍♂️</span>
+                <span className="text-xl animate-pulse">�</span>
                 <div className="flex flex-col items-center">
                   <span className="text-sm font-bold">Incognito Mode</span>
                   <span className="text-xs opacity-75">Private • Local Storage</span>
@@ -732,7 +732,7 @@ const AuthPage = () => {
                 }}
                 className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3 px-4 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all duration-300"
               >
-                🕵️‍♂️ Use Incognito Mode
+                � Use Incognito Mode
               </button>
             </div>
           </div>

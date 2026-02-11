@@ -99,7 +99,7 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
                                 className="w-8 h-8 rounded-full object-cover border-2 border-slate-200"
                             />
                         ) : (
-                            <span className="text-2xl animate-pulse"></span>
+                            <span className="text-2xl animate-pulse">👤</span>
                         )}
                         <span className="hidden sm:block text-sm font-bold text-slate-600 dark:text-slate-300">{displayName}</span>
                     </Link>

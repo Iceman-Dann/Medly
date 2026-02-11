@@ -49,7 +49,7 @@ const Sidebar: React.FC = () => {
             </nav>
             <div className="pt-6 border-t border-slate-200 dark:border-rose-900/20">
                 <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl animate-pulse">🕵️‍♂️</span>
+                    <span className="text-3xl animate-pulse">�</span>
                     <div>
                         <p className="text-sm font-semibold">Incognito Mode</p>
                         <p className="text-[10px] font-black uppercase text-primary tracking-widest">Private Vault</p>
