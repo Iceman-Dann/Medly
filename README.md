@@ -170,27 +170,23 @@ Access: `http://localhost:5173`
 
 ### 🏗️ **Enterprise Architecture: Built for Scale**
 ```mermaid
-graph TD
-    A[Medly Application] --> B[Frontend Layer]
-    A --> C[Backend Services]
-    A --> D[Data Layer]
-    A --> E[Security Layer]
+graph LR
+    A[Medly Core] --> B[Frontend]
+    A --> C[Backend]
+    A --> D[Data]
+    A --> E[Security]
     
-    B --> B1[React Components]
-    B --> B2[TypeScript Logic]
-    B --> B3[Tailwind Styling]
+    B --> B1[React]
+    B --> B2[TypeScript]
     
-    C --> C1[AI Integration]
-    C --> C2[API Services]
-    C --> C3[PDF Generation]
+    C --> C1[AI Services]
+    C --> C2[API Integration]
     
-    D --> D1[IndexedDB Storage]
-    D --> D2[Local Processing]
-    D --> D3[Offline Capability]
+    D --> D1[IndexedDB]
+    D --> D2[Local Storage]
     
     E --> E1[Zero-Knowledge]
-    E --> E2[AES-256 Encryption]
-    E --> E3[GDPR/HIPAA Compliance]
+    E --> E2[AES-256]
     
     style A fill:#1a1a1a
     style B fill:#2d2d2d
@@ -199,7 +195,7 @@ graph TD
     style E fill:#666666
 ```
 
-**Scalable Foundation**: Every component is engineered for enterprise scale, supporting millions of users while maintaining the performance and security that healthcare demands.
+**Scalable Foundation**: Enterprise-grade architecture supporting millions of users with healthcare-grade security and performance.
 
 ---
 
