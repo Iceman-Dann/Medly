@@ -58,7 +58,8 @@ graph LR
 ### 📊 **Interactive Health Timeline**
 ```mermaid
 gantt
-    Health Journey Timeline
+    title Health Journey Timeline
+    dateFormat  YYYY-MM-DD
     section Symptom Tracking
     Daily Logging     :done, logging, 2024-01-01, 30d
     Pattern Analysis  :active, analysis, 2024-01-15, 15d
@@ -261,7 +262,8 @@ graph LR
 ### Phase 2: Enhanced Intelligence
 ```mermaid
 gantt
-    Development Roadmap
+    title Development Roadmap
+    dateFormat  YYYY-MM-DD
     section Phase 2
     Multi-Language Support :lang, 2024-03-01, 30d
     Wearable Integration   :wearable, 2024-03-15, 45d
