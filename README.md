@@ -159,14 +159,47 @@ This isn't just a demo or prototype - this is production-ready technology that c
 
 ### ⚡ **Quick Start: Transform Healthcare in 60 Seconds**
 ```bash
+# Clone the repository
 git clone https://github.com/Iceman-Dann/Medly.git
 cd Medly
+
+# Install dependencies
 npm install
-echo "VITE_GEMINI_API_KEY=your_gemini_api_key" > .env.local
+
+# Set up environment variables
+cp .env.example .env.local
+echo "VITE_GEMINI_API_KEY=your_gemini_api_key" >> .env.local
+echo "VITE_OPENAI_API_KEY=your_openai_api_key" >> .env.local
+echo "VITE_FIREBASE_API_KEY=your_firebase_api_key" >> .env.local
+
+# Start development server
 npm run dev
 ```
 
 Access: `http://localhost:5173`
+
+### 🔧 **Environment Configuration**
+Create `.env.local` with the following variables:
+```bash
+# AI Providers (choose one or more)
+VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_GROQ_API_KEY=your_groq_api_key
+VITE_ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abcdef
+
+# Application Settings
+VITE_APP_NAME=Medly
+VITE_APP_VERSION=1.0.0
+VITE_API_BASE_URL=https://api.medly.app/v1
+```
 
 ### 🏗️ **Enterprise Architecture: Built for Scale**
 ```mermaid
@@ -176,17 +209,21 @@ graph LR
     A --> D[Data]
     A --> E[Security]
     
-    B --> B1[React]
+    B --> B1[React 19]
     B --> B2[TypeScript]
+    B --> B3[Vite]
     
     C --> C1[AI Services]
     C --> C2[API Integration]
+    C --> C3[Firebase]
     
     D --> D1[IndexedDB]
     D --> D2[Local Storage]
+    D --> D3[Cloud Sync]
     
     E --> E1[Zero-Knowledge]
     E --> E2[AES-256]
+    E --> E3[HIPAA/GDPR]
     
     style A fill:#1a1a1a
     style B fill:#2d2d2d
@@ -196,6 +233,84 @@ graph LR
 ```
 
 **Scalable Foundation**: Enterprise-grade architecture supporting millions of users with healthcare-grade security and performance.
+
+### 📁 **Project Structure**
+```
+Medly/
+├── components/          # Reusable UI components
+│   ├── EmergencyAlert.tsx
+│   ├── Sidebar.tsx
+│   └── TestComponent.tsx
+├── lib/                # Core libraries and utilities
+│   ├── api/           # API integrations (OpenAI, Gemini, Groq, Anthropic)
+│   ├── chat/          # Chat functionality and AI interactions
+│   ├── db/            # Database operations (IndexedDB)
+│   └── firebase.ts    # Firebase configuration
+├── pages/             # Page components and routing
+├── services/          # Business logic services
+├── types.ts           # TypeScript type definitions
+├── App.tsx            # Main application component
+├── HealthContext.tsx  # Global health state management
+├── FocusModeContext.tsx # Focus mode state management
+└── vite.config.ts     # Vite configuration
+```
+
+### 🛠️ **Technology Stack**
+```mermaid
+graph TB
+    subgraph "Frontend"
+        A[React 19.2.3]
+        B[TypeScript 5.8.2]
+        C[Vite 6.2.0]
+        D[TailwindCSS]
+    end
+    
+    subgraph "Backend & Services"
+        E[Firebase 12.8.0]
+        F[OpenAI 6.16.0]
+        G[Google Gemini 1.38.0]
+        G2[Groq SDK 0.37.0]
+        G3[Anthropic 0.71.2]
+    end
+    
+    subgraph "Data & Storage"
+        H[IndexedDB]
+        I[Local Storage]
+        J[Dexie 4.2.1]
+    end
+    
+    subgraph "Development Tools"
+        K[ESLint]
+        L[Prettier]
+        M[TypeScript]
+    end
+    
+    A --> E
+    B --> F
+    C --> G
+    D --> H
+    E --> I
+    F --> J
+```
+
+### 🚀 **Available Scripts**
+```bash
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run deploy       # Build and deploy
+
+# Testing (when implemented)
+npm test            # Run tests
+npm run test:watch  # Run tests in watch mode
+npm run test:coverage # Run tests with coverage
+
+# Code Quality
+npm run lint        # Run ESLint
+npm run format      # Format code with Prettier
+npm run type-check  # TypeScript type checking
+```
 
 ---
 
@@ -239,7 +354,27 @@ Medly represents the convergence of massive market need, breakthrough technology
 
 <div align="center">
 
-**[Get Started](https://github.com/Iceman-Dann/Medly)** • **[Documentation](https://docs.medly.app)** • **[Issues](https://github.com/Iceman-Dann/Medly/issues)**
+**[Get Started](https://github.com/Iceman-Dann/Medly)** • **[Documentation](https://docs.medly.app)** • **[API Reference](https://docs.medly.app/api)** • **[Issues](https://github.com/Iceman-Dann/Medly/issues)** • **[Discord](https://discord.gg/medly)**
+
+## 📚 **Documentation & Resources**
+
+### Core Documentation
+- **[API Documentation](./API.md)** - Complete API reference and examples
+- **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute to Medly
+- **[Code of Conduct](./CODE_OF_CONDUCT.md)** - Community guidelines
+- **[Security Policy](./SECURITY.md)** - Security and privacy information
+- **[Changelog](./CHANGELOG.md)** - Version history and updates
+
+### Development Resources
+- **[TypeScript Configuration](./tsconfig.json)** - TypeScript setup
+- **[Vite Configuration](./vite.config.ts)** - Build configuration
+- **[Package Information](./package.json)** - Dependencies and scripts
+
+### Community & Support
+- **[GitHub Discussions](https://github.com/Iceman-Dann/Medly/discussions)** - Community discussions
+- **[GitHub Issues](https://github.com/Iceman-Dann/Medly/issues)** - Bug reports and feature requests
+- **[Discord Community](https://discord.gg/medly)** - Real-time chat and support
+- **[Email Support](mailto:support@medly.app)** - Direct support
 
 Built for Dev Season of Code 2026
 
