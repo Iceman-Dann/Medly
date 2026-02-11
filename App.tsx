@@ -48,7 +48,7 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
         }
     };
 
-    const displayName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous User';
+    const displayName = user?.displayName || user?.email?.split('@')[0] || 'Incognito Mode';
     const userPhoto = user?.photoURL;
     
     return (
@@ -99,7 +99,7 @@ const Header = ({ toggleMobileMenu }: { toggleMobileMenu: () => void }) => {
                                 className="w-8 h-8 rounded-full object-cover border-2 border-slate-200"
                             />
                         ) : (
-                            <span className="mdi mdi-account-circle text-slate-500 dark:text-slate-400 text-2xl"></span>
+                            <span className="text-2xl animate-pulse"></span>
                         )}
                         <span className="hidden sm:block text-sm font-bold text-slate-600 dark:text-slate-300">{displayName}</span>
                     </Link>
@@ -130,7 +130,7 @@ const MobileMenu = ({ isOpen, closeMenu }: { isOpen: boolean, closeMenu: () => v
         return unsubscribe;
     }, []);
 
-    const displayName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous User';
+    const displayName = user?.displayName || user?.email?.split('@')[0] || 'Incognito Mode';
     const userPhoto = user?.photoURL;
 
     const handleLogout = async () => {

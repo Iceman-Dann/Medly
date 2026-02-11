@@ -28,6 +28,7 @@ const AuthPage = () => {
   const [judgeReaction, setJudgeReaction] = useState<'normal' | 'happy' | 'angry' | 'surprised' | 'dizzy'>('normal');
   const [pokeCount, setPokeCount] = useState(0);
   const [isPoked, setIsPoked] = useState(false);
+  const [showAccountNotFound, setShowAccountNotFound] = useState(false);
   const navigate = useNavigate();
   const animationRef = useRef<HTMLDivElement>(null);
 
@@ -244,7 +245,13 @@ const AuthPage = () => {
         }, 1500);
       }
     } catch (err: any) {
-      setError(err.message);
+      // Check if it's a "user not found" error
+      if (err.code === 'auth/user-not-found' || err.message.includes('user not found') || err.message.includes('account not found')) {
+        setShowAccountNotFound(true);
+        setError('');
+      } else {
+        setError(err.message);
+      }
       judgeCharacter.updateMemory(email, { 
         passwordAttempts: (judgeCharacter.getMemory(email).passwordAttempts || 0) + 1 
       });
@@ -662,10 +669,13 @@ const AuthPage = () => {
               <button
                 onClick={handleAnonymousSignIn}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-rose-600 text-white py-3 px-4 rounded-xl font-bold hover:from-purple-700 hover:to-rose-700 transition-all duration-300 disabled:opacity-50 transform hover:scale-105 active:scale-95"
+                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3 px-4 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all duration-300 disabled:opacity-50 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
               >
-                <span className="text-lg">Quick Access</span>
-                Quick Anonymous Sign-In (Local Storage Only)
+                <span className="text-xl animate-pulse">🕵️‍♂️</span>
+                <div className="flex flex-col items-center">
+                  <span className="text-sm font-bold">Incognito Mode</span>
+                  <span className="text-xs opacity-75">Private • Local Storage</span>
+                </div>
               </button>
             </div>
           </div>
@@ -681,6 +691,53 @@ const AuthPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Account Not Found Popup */}
+      {showAccountNotFound && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-surface-dark rounded-2xl p-8 max-w-md w-full shadow-2xl transform animate-pulse">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4 animate-bounce">🤔</div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                Account Not Found
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                Looks like you don't have an account yet! Want to create one?
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setIsLogin(false);
+                  setShowAccountNotFound(false);
+                  speakJudge('greeting');
+                }}
+                className="w-full bg-rose-500 text-white py-3 px-4 rounded-xl font-bold hover:bg-rose-600 transition-colors"
+              >
+                Create New Account
+              </button>
+              
+              <button
+                onClick={() => setShowAccountNotFound(false)}
+                className="w-full bg-slate-100 dark:bg-rose-950/30 text-slate-700 dark:text-slate-300 py-3 px-4 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-rose-950/50 transition-colors"
+              >
+                Try Different Email
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowAccountNotFound(false);
+                  handleAnonymousSignIn();
+                }}
+                className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3 px-4 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all duration-300"
+              >
+                🕵️‍♂️ Use Incognito Mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
