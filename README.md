@@ -169,16 +169,34 @@ npm run dev
 Access: `http://localhost:5173`
 
 ### 🏗️ **Enterprise Architecture: Built for Scale**
-```
-Medly/
-├── src/
-│   ├── pages/           # Core application screens
-│   ├── components/      # Reusable UI components
-│   ├── lib/            # Core business logic
-│   ├── services/        # External API integrations
-│   └── styles/         # Design system and theming
-├── public/             # Static assets and PWA files
-└── docs/               # Technical documentation
+```mermaid
+graph TD
+    A[Medly Application] --> B[Frontend Layer]
+    A --> C[Backend Services]
+    A --> D[Data Layer]
+    A --> E[Security Layer]
+    
+    B --> B1[React Components]
+    B --> B2[TypeScript Logic]
+    B --> B3[Tailwind Styling]
+    
+    C --> C1[AI Integration]
+    C --> C2[API Services]
+    C --> C3[PDF Generation]
+    
+    D --> D1[IndexedDB Storage]
+    D --> D2[Local Processing]
+    D --> D3[Offline Capability]
+    
+    E --> E1[Zero-Knowledge]
+    E --> E2[AES-256 Encryption]
+    E --> E3[GDPR/HIPAA Compliance]
+    
+    style A fill:#1a1a1a
+    style B fill:#2d2d2d
+    style C fill:#404040
+    style D fill:#535353
+    style E fill:#666666
 ```
 
 **Scalable Foundation**: Every component is engineered for enterprise scale, supporting millions of users while maintaining the performance and security that healthcare demands.
