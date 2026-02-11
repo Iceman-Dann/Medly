@@ -1,3 +1,4 @@
+<br>
 <div align="center">
 
 # Medly
@@ -23,22 +24,22 @@ Medly addresses the critical gap in healthcare communication: **70% of patients*
 
 ## Innovation
 
-### **Intelligent Health Analysis**
+### 🧠 **Intelligent Health Analysis**
 - **Pattern Recognition**: Advanced algorithms identify symptom correlations
 - **Clinical Documentation**: Automated SOAP note generation
 - **Predictive Insights**: AI-powered preparation recommendations
 
-### **Interactive Health Timeline**
+### 📊 **Interactive Health Timeline**
 - **Visual Data Representation**: Intuitive health pattern visualization
 - **Multi-Modal Tracking**: Symptoms, medications, lifestyle factors
 - **Trend Analysis**: Machine learning identifies emerging patterns
 
-### **Professional Medical Preparation**
+### 🏥 **Professional Medical Preparation**
 - **Smart Question Generation**: Context-aware questions based on health history
 - **Appointment Optimization**: Structured preparation framework
 - **Report Generation**: Professional medical reports (PDF, digital)
 
-### **Privacy-First Architecture**
+### 🔒 **Privacy-First Architecture**
 - **Dual Storage Model**: Cloud sync with complete offline capability
 - **Zero-Knowledge Privacy**: End-to-end encryption
 - **Secure Sharing**: QR-based medical information transfer
@@ -46,6 +47,28 @@ Medly addresses the critical gap in healthcare communication: **70% of patients*
 ---
 
 ## Technical Architecture
+
+### System Architecture
+```mermaid
+graph TB
+    A[React 19 + TypeScript] --> B[Vite Build System]
+    B --> C[Tailwind CSS Styling]
+    A --> D[React Router Navigation]
+    A --> E[State Management]
+    
+    E --> F[Dexie IndexedDB]
+    F --> G[Local Storage Layer]
+    
+    A --> H[AI Integration Layer]
+    H --> I[Gemini AI Services]
+    
+    E --> J[PDF Generation]
+    J --> K[jsPDF Engine]
+    
+    L[Security Layer] --> F
+    L --> H
+    L --> M[Encryption Module]
+```
 
 ### Technology Stack
 | Component | Technology | Purpose |
@@ -57,11 +80,29 @@ Medly addresses the critical gap in healthcare communication: **70% of patients*
 | **AI Services** | Google Gemini | Advanced health insights |
 | **PDF Generation** | jsPDF | Client-side report generation |
 
+### Data Flow Architecture
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as Frontend
+    participant DB as Local DB
+    participant AI as Gemini AI
+    participant PDF as Report Engine
+
+    U->>UI: Log Symptom
+    UI->>DB: Store Health Data
+    UI->>AI: Analyze Patterns
+    AI->>UI: Return Insights
+    UI->>PDF: Generate Report
+    PDF->>UI: Return Document
+    UI->>U: Display Results
+```
+
 ### Performance Metrics
-- **Sub-2s Initial Load**: Optimized bundle splitting
-- **100% Offline Capability**: Full functionality without internet
-- **Responsive Design**: Optimized across all devices
-- **Zero Data Leakage**: Privacy-by-design architecture
+- ⚡ **Sub-2s Initial Load**: Optimized bundle splitting
+- 🔄 **100% Offline Capability**: Full functionality without internet
+- 📱 **Responsive Design**: Optimized across all devices
+- 🔒 **Zero Data Leakage**: Privacy-by-design architecture
 
 ---
 
@@ -105,6 +146,7 @@ npm run lint         # Code quality
 
 ## System Architecture
 
+### Application Structure
 ```
 Medly/
 ├── src/
