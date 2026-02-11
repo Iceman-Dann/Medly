@@ -181,6 +181,8 @@ Medly/
 └── docs/               # Technical documentation
 ```
 
+**Scalable Foundation**: Every component is engineered for enterprise scale, supporting millions of users while maintaining the performance and security that healthcare demands.
+
 ---
 
 ## Security & Privacy: Trust That Never Breaks
