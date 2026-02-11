@@ -466,7 +466,7 @@ const AuthPage = () => {
             {email && (
               <div className="mt-6 flex flex-wrap gap-2 justify-center">
                 {judgeCharacter.getAchievements(email).map((achievement, index) => (
-                  <span key={index} className="bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
+                 <span key={index} className="bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
                     {achievement}
                   </span>
                 ))}
@@ -605,8 +605,8 @@ const AuthPage = () => {
               {passwordValidation && (
                 <div className="mt-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-slate-600">Strength:</span>
-                    <span className={`text-xs font-bold ${
+                   <span className="text-xs font-medium text-slate-600">Strength:</span>
+                   <span className={`text-xs font-bold ${
                       passwordValidation.strength === 'Strong' ? 'text-green-600' :
                       passwordValidation.strength === 'Medium' ? 'text-yellow-600' : 'text-red-600'
                     }`}>
@@ -646,7 +646,7 @@ const AuthPage = () => {
                 <div className="w-full border-t border-slate-300 dark:border-rose-900/30"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-surface-dark text-slate-500">Or continue with</span>
+               <span className="px-2 bg-white dark:bg-surface-dark text-slate-500">Or continue with</span>
               </div>
             </div>
 
@@ -671,10 +671,10 @@ const AuthPage = () => {
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3 px-4 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all duration-300 disabled:opacity-50 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
               >
-                <span className="text-xl animate-pulse">�</span>
+               <span className="text-xl animate-pulse material-symbols-outlined">person_off</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-sm font-bold">Incognito Mode</span>
-                  <span className="text-xs opacity-75">Private • Local Storage</span>
+                 <span className="text-sm font-bold">Incognito Mode</span>
+                 <span className="text-xs opacity-75">Private • Local Storage</span>
                 </div>
               </button>
             </div>
@@ -732,7 +732,7 @@ const AuthPage = () => {
                 }}
                 className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3 px-4 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all duration-300"
               >
-                � Use Incognito Mode
+                �<span className="material-symbols-outlined">person_off</span> Use Incognito Mode
               </button>
             </div>
           </div>
