@@ -16,7 +16,8 @@
 
 ---
 
-![Medly SOAP Note](./translatingmedicalscreenshot.png)
+![Medly SOAP Note](./<img width="558" height="302" alt="image" src="https://github.com/user-attachments/assets/101b5bd2-c406-4bd2-8a17-4e338fee8b03" />
+)
 
 ![Medly Health Overview](./logshowcase.png)
 
