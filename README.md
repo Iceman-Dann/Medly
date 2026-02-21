@@ -14,6 +14,14 @@
 
 *Built solo. Built for Dev Season of Code 2026.*
 
+---
+
+![Medly SOAP Note](./translatingmedicalscreenshot.png)
+
+![Medly Health Overview](./logshowcase.png)
+
+![Medly Data Intelligence](./screenshot1.png)
+
 </div>
 
 ---
@@ -72,7 +80,7 @@ graph LR
     B --> C[Pattern Recognition]
     C --> D[SOAP Generation]
     D --> E[Provider Ready]
-    
+
     style A fill:#1a1a1a
     style B fill:#2d2d2d
     style C fill:#404040
