@@ -1,51 +1,70 @@
 <div align="center">
 
-# Medly
-### The first consumer app that generates clinical-grade SOAP notes and delivers real-time AI triage to patients.
+<img src="https://img.shields.io/badge/DEV%20SEASON%20OF%20CODE%202026-000000?style=for-the-badge" />
+
+# 🏥 Medly
+
+### *The first consumer app that generates clinical-grade SOAP notes*
+### *and delivers real-time AI triage directly to patients.*
+
+<br/>
 
 [![MIT License](https://img.shields.io/badge/License-MIT-black?style=flat)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-000000?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React_19-000000?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite_6-000000?style=flat&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![React 19](https://img.shields.io/badge/React_19-000000?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Vite 6](https://img.shields.io/badge/Vite_6-000000?style=flat&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-000000?style=flat&logo=firebase&logoColor=FFCA28)](https://firebase.google.com/)
-[![Gemini](https://img.shields.io/badge/Gemini_AI-000000?style=flat&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![Gemini AI](https://img.shields.io/badge/Gemini_AI-000000?style=flat&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)](https://vercel.com/)
 
-**[🚀 Live Demo](https://medly-health.vercel.app)** — Click **"Try Demo"** — No account. No friction. One click.
+<br/>
 
-*Built solo. Built for Dev Season of Code 2026.*
+### 🚀 [**Try the Live Demo**](https://medly-health.vercel.app) — Click **"Try Demo"** — No account. No forms. One click.
+
+<br/>
+
+> *70% of patients leave doctor appointments unheard.*
+> *Medly ends that.*
+
+<br/>
 
 ---
 
-![Medly SOAP Note](./<img width="558" height="302" alt="image" src="https://github.com/user-attachments/assets/101b5bd2-c406-4bd2-8a17-4e338fee8b03" />
-)
+![Medly — Translating Patient Language to Medical Language](./translatingpatientlanguage.png)
 
-![Medly Health Overview](./logshowcase.png)
+<br/>
 
-![Medly Data Intelligence](./screenshot1.png)
+![Medly — Health Overview Dashboard](./logshowcase.png)
+
+<br/>
+
+![Medly — Data Entry vs Data Intelligence](./screenshot1.png)
+
+<br/>
+
+---
 
 </div>
 
----
-
-## The Problem
+## 📋 The Problem
 
 | Reality | Impact |
 |---|---|
 | 70% of patients arrive at appointments unprepared | Critical symptoms go unmentioned |
-| Doctors average 7 minutes per visit | No time to extract buried context |
+| Doctors average **7 minutes** per visit | No time to extract buried context |
 | Patients describe symptoms from memory | Patterns missed for months or years |
 | **$125,000,000,000** lost annually | To preventable healthcare miscommunication |
 | **250,000 deaths/year** | From preventable medical errors |
 
-**This isn't a niche problem. This is every family. Every appointment. Every day.**
+> **This isn't a niche problem. This is every family. Every appointment. Every day.**
 
 ---
 
-## The Solution
+## ⚡ The Solution
 
-Medly converts everyday symptom logs into clinical-grade SOAP notes — the exact structured format doctors use — before the patient walks in.
+Medly converts everyday symptom logs into clinical-grade SOAP notes — the exact structured format doctors use — in seconds.
 
-### From Patient Language → Clinical Language. Instantly.
+### Patient Language → Clinical Language. Instantly.
 
 **What a patient says:**
 > *"I've had really bad headaches for months, worse around my period, nothing helps"*
@@ -55,7 +74,7 @@ Medly converts everyday symptom logs into clinical-grade SOAP notes — the exac
 | Section | Clinical Output |
 |---|---|
 | **[S] Subjective** | 32F. Chronic migraines 3 years. 47 episodes/90 days. Avg 7.2/10 severity. 8 missed workdays. Triggers: stress, poor sleep. |
-| **[O] Objective** | Frequency ↑ 40% month-over-month. 100% severity correlation with luteal phase. Photophobia in 89% of episodes. |
+| **[O] Objective** | Frequency ↑ 40% MoM. 100% severity correlation with luteal phase. Photophobia in 89% of episodes. |
 | **[A] Assessment** | Pattern consistent with menstrual migraine. Hormonal trigger primary. Current treatment protocol misaligned. |
 | **[P] Plan** | CGRP monoclonal antibody evaluation. Hormonal panel referral. Sleep hygiene protocol. Follow-up in 4 weeks. |
 
@@ -63,7 +82,7 @@ Medly converts everyday symptom logs into clinical-grade SOAP notes — the exac
 
 ---
 
-## Intelligence Layer
+## 🧠 Intelligence Layer
 
 Medly doesn't just log symptoms — it reasons about them.
 
@@ -91,7 +110,7 @@ graph LR
 
 ---
 
-## Performance
+## 📊 Performance
 
 | Metric | Result |
 |---|---|
@@ -101,7 +120,7 @@ graph LR
 | Offline capability | **100%** — works without signal |
 | Pattern recognition accuracy | **94%** |
 | SOAP generation speed | **< 1.5 seconds** |
-| Clinician processing improvement | **3x faster** than narrative text |
+| Clinician processing speed | **3x faster** than narrative text |
 
 ```mermaid
 xychart-beta
@@ -113,7 +132,7 @@ xychart-beta
 
 ---
 
-## Tech Stack
+## 🛠 Tech Stack
 
 | Layer | Technology | Why |
 |---|---|---|
@@ -151,76 +170,76 @@ graph TB
 
 ---
 
-## Engineering Standards
+## 🔒 Engineering Standards
 
-This isn't a hackathon prototype. It's a production-grade system.
+> This isn't a hackathon prototype. It's a production-grade system. Built solo. Every line.
 
 | Standard | Implementation |
 |---|---|
-| Language | 100% TypeScript |
-| Encryption | AES-256 end-to-end |
-| PII Handling | Auto-redacted before external processing |
-| Privacy Architecture | Zero-knowledge — server cannot read user data |
-| Offline Support | Full functionality without internet |
-| Compliance | HIPAA + GDPR ready by architecture |
-| Code Quality | ESLint + Prettier enforced |
-| Commits | 46 — real development history |
+| Language | **100% TypeScript** — strict mode, no `any` |
+| Encryption | **AES-256** end-to-end |
+| PII Handling | **Auto-redacted** before any external API call |
+| Privacy Architecture | **Zero-knowledge** — servers cannot read user data |
+| Offline Support | **100%** functionality without internet |
+| Compliance | **HIPAA + GDPR** ready by architecture |
+| Code Quality | **ESLint + Prettier** enforced throughout |
+| Version Control | **46 commits** — real development history |
 
 ---
 
-## Repository Structure
-
-```
-Medly/
-├── components/         # Reusable UI components
-│   ├── EmergencyAlert.tsx
-│   ├── Sidebar.tsx
-│   └── TestComponent.tsx
-├── lib/               # Core libraries
-│   ├── api/           # AI integrations (Gemini, OpenAI, Groq, Anthropic)
-│   ├── chat/          # Clinical AI interactions
-│   └── db/            # IndexedDB operations
-├── pages/             # Page components + routing
-├── services/          # Business logic
-├── types.ts           # TypeScript definitions
-├── App.tsx            # Main application
-├── HealthContext.tsx   # Global health state
-├── BENCHMARKS.md      # Performance methodology
-├── API.md             # Full API documentation
-├── SECURITY.md        # Security policy
-└── CHANGELOG.md       # Version history
-```
-
----
-
-## Competitive Landscape
+## 🏆 Competitive Landscape
 
 | Feature | Medly | Bearable | Symptoms Diary | MySymptoms |
 |---|---|---|---|---|
 | SOAP Note Generation | ✅ | ❌ | ❌ | ❌ |
 | Real-time AI Triage | ✅ | ❌ | ❌ | ❌ |
 | Cycle Phase Correlation | ✅ | Partial | ❌ | ❌ |
-| Offline-First | ✅ | ❌ | ✅ | ❌ |
+| Offline-First Architecture | ✅ | ❌ | ✅ | ❌ |
 | Multi-Model AI | ✅ | ❌ | ❌ | ❌ |
 | Clinical-Grade Output | ✅ | ❌ | ❌ | ❌ |
 | Zero-Knowledge Privacy | ✅ | ❌ | ❌ | ❌ |
-| Live Demo | ✅ | — | — | — |
+| Live Deployable Demo | ✅ | — | — | — |
 
 ---
 
-## Roadmap
+## 🗂 Repository Structure
+
+```
+Medly/
+├── components/           # Reusable UI components
+│   ├── EmergencyAlert.tsx
+│   ├── Sidebar.tsx
+│   └── TestComponent.tsx
+├── lib/                 # Core libraries
+│   ├── api/             # AI integrations (Gemini, OpenAI, Groq, Anthropic)
+│   ├── chat/            # Clinical AI interactions
+│   └── db/              # IndexedDB operations
+├── pages/               # Page components + routing
+├── services/            # Business logic services
+├── types.ts             # TypeScript type definitions
+├── App.tsx              # Main application component
+├── HealthContext.tsx     # Global health state management
+├── BENCHMARKS.md        # Performance methodology + accuracy testing
+├── API.md               # Full API documentation
+├── SECURITY.md          # Security + privacy policy
+└── CHANGELOG.md         # Version history
+```
+
+---
+
+## 🚀 Roadmap
 
 | Phase | What | Status |
 |---|---|---|
-| 1 | Core platform + symptom engine | ✅ Live |
-| 2 | Gemini clinical intelligence layer | ✅ Live |
-| 3 | Provider Prep Hub + SOAP generation | ✅ Live |
+| 1 | Core platform + symptom engine | ✅ **Live** |
+| 2 | Gemini clinical intelligence layer | ✅ **Live** |
+| 3 | Provider Prep Hub + SOAP generation | ✅ **Live** |
 | 4 | iOS + Android native apps | 🔄 Q2 2026 |
 | 5 | Hospital APIs + EHR integration | 🔜 2027 |
 
 ---
 
-## Quick Start
+## ⚙️ Quick Start
 
 ```bash
 git clone https://github.com/Iceman-Dann/Medly.git
@@ -230,7 +249,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Access: `http://localhost:5173`
+Open `http://localhost:5173`
 
 ### Environment Variables
 
@@ -247,9 +266,21 @@ VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
 ```
 
+### Scripts
+
+```bash
+npm run dev           # Development server
+npm run build         # Production build
+npm run preview       # Preview build
+npm test              # Run tests
+npm run lint          # ESLint
+npm run format        # Prettier
+npm run type-check    # TypeScript check
+```
+
 ---
 
-## Documentation
+## 📚 Documentation
 
 | Document | Description |
 |---|---|
@@ -261,26 +292,20 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 
 ---
 
-## Scripts
-
-```bash
-npm run dev          # Development server
-npm run build        # Production build
-npm run preview      # Preview build
-npm test             # Run tests
-npm run lint         # ESLint
-npm run format       # Prettier
-npm run type-check   # TypeScript check
-```
-
----
-
 <div align="center">
 
-**[🚀 Try It Live](https://medly-health.vercel.app)** • **[📁 GitHub](https://github.com/Iceman-Dann/Medly)** • **[📄 API Docs](./API.md)**
+<br/>
 
-*Built solo. Every line. For the patients who left appointments still unheard.*
+**[🚀 Try It Live](https://medly-health.vercel.app)** &nbsp;•&nbsp; **[📁 Repository](https://github.com/Iceman-Dann/Medly)** &nbsp;•&nbsp; **[📄 API Docs](./API.md)**
 
-*Dev Season of Code 2026*
+<br/>
+
+*Built solo. Every line. Every decision. Every feature.*
+
+*For the patients who left appointments still unheard.*
+
+<br/>
+
+<img src="https://img.shields.io/badge/Built%20for%20Dev%20Season%20of%20Code%202026-000000?style=for-the-badge" />
 
 </div>
