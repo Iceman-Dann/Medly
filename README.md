@@ -30,7 +30,7 @@
 
 ---
 
-![Medly — Translating Patient Language to Medical Language](./translatingpatientlanguage.png)
+![Medly — Translating Patient Language to Medical Language](./translatingpatientlaunguage.png)
 
 <br/>
 
