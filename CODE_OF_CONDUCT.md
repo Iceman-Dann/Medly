@@ -45,13 +45,7 @@ Medly handles sensitive health information. Additional expectations apply:
 
 ## Reporting
 
-If you experience or witness a violation:
-
-| Channel | Contact |
-|---|---|
-| Email | conduct@medly.app |
-| GitHub | [Open a private issue](https://github.com/Iceman-Dann/Medly/issues) |
-| Emergency | emergency@medly.app |
+If you experience or witness a violation, open a private issue on [GitHub](https://github.com/Iceman-Dann/Medly/issues).
 
 All reports are handled confidentially. We respond within 48 hours.
 
@@ -83,4 +77,4 @@ Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 ---
 
-*Effective February 2026. For questions: conduct@medly.app*
+*Effective February 2026.*
